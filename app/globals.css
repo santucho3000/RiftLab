@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgba(72, 199, 244, 0.08), transparent 32rem),
+    linear-gradient(145deg, #05070b 0%, #07101a 48%, #05070b 100%);
+  color: #e7eef8;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(69, 212, 255, 0.28);
+}
+
+.lab-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+@layer components {
+  .section-primary {
+    @apply rounded-md border border-lab-cyan/20 bg-lab-panel p-7 shadow-primary-glow sm:p-8;
+  }
+
+  .section-secondary {
+    @apply rounded-md border border-white/[0.08] bg-lab-panel p-6 shadow-panel-glow sm:p-7;
+  }
+
+  .section-tertiary {
+    @apply rounded-md border border-white/[0.07] bg-lab-panel/90 p-5 sm:p-6;
+  }
+
+  .inner-surface {
+    @apply rounded-md border border-white/[0.07] bg-lab-panel2/70;
+  }
+
+  .quiet-surface {
+    @apply rounded-md border border-white/[0.06] bg-black/20;
+  }
+
+  .eyebrow {
+    @apply text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-lab-cyan;
+  }
+
+  .label-muted {
+    @apply text-[0.7rem] font-medium uppercase tracking-[0.12em] text-lab-subdued;
+  }
+
+  .body-copy {
+    @apply text-sm leading-7 text-slate-300;
+  }
+
+  .body-copy-lg {
+    @apply text-base leading-8 text-slate-200;
+  }
+}

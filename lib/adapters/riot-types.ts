@@ -15,6 +15,11 @@ export type RiotMatchDto = {
   info: RiotMatchInfoDto;
 };
 
+export type RiotTimelineDto = {
+  metadata: RiotMatchMetadataDto;
+  info: RiotTimelineInfoDto;
+};
+
 export type RiotMatchMetadataDto = {
   dataVersion: string;
   matchId: string;
@@ -28,6 +33,54 @@ export type RiotMatchInfoDto = {
   gameVersion: string;
   participants: RiotParticipantDto[];
   teams: RiotTeamDto[];
+};
+
+export type RiotTimelineInfoDto = {
+  frameInterval: number;
+  frames: RiotTimelineFrameDto[];
+  participants: RiotTimelineParticipantDto[];
+};
+
+export type RiotTimelineParticipantDto = {
+  participantId: number;
+  puuid: string;
+};
+
+export type RiotTimelineFrameDto = {
+  timestamp: number;
+  events: RiotTimelineEventDto[];
+  participantFrames: Record<string, RiotParticipantFrameDto>;
+};
+
+export type RiotParticipantFrameDto = {
+  participantId: number;
+  currentGold: number;
+  totalGold: number;
+  level: number;
+  minionsKilled: number;
+  jungleMinionsKilled: number;
+  position?: RiotPositionDto;
+};
+
+export type RiotPositionDto = {
+  x: number;
+  y: number;
+};
+
+export type RiotTimelineEventDto = {
+  type: string;
+  timestamp: number;
+  participantId?: number;
+  killerId?: number;
+  victimId?: number;
+  assistingParticipantIds?: number[];
+  monsterType?: string;
+  monsterSubType?: string;
+  killerTeamId?: number;
+  teamId?: number;
+  buildingType?: string;
+  towerType?: string;
+  laneType?: string;
 };
 
 export type RiotParticipantDto = {

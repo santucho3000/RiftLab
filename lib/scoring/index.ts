@@ -1,5 +1,7 @@
 import type { ConfidenceLevel, MatchReport, MetricScore, MetricStatus, RiskStatus } from "@/lib/types";
 
+export * from "@/lib/scoring/real-scoring";
+
 export function getMetricStatus(score: number): MetricStatus {
   if (score >= 78) return "Strong";
   if (score >= 58) return "Average";

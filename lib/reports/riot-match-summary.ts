@@ -6,6 +6,7 @@ export type RiotMatchSummary = {
   position: string;
   result: "Win" | "Loss";
   duration: string;
+  durationMinutes: number;
   kills: number;
   deaths: number;
   assists: number;
@@ -14,6 +15,8 @@ export type RiotMatchSummary = {
   goldEarned: number;
   goldPerMinute: number;
   visionScore: number;
+  teamKills: number;
+  killParticipation: number | null;
   summonerLevel: number | null;
   teamSide: "Blue" | "Red" | "Unknown";
 };
@@ -29,6 +32,8 @@ export function summarizeParticipantMatch(match: RiotMatchDto, puuid: string): R
   const totalCs = getTotalCs(participant);
   const position = participant.teamPosition || participant.individualPosition || "Unknown";
   const result = participant.win ? "Win" : "Loss";
+  const teamKills = getTeamKills(match, participant.teamId);
+  const killParticipation = teamKills > 0 ? roundTwo((participant.kills + participant.assists) / teamKills) : null;
 
   console.info("[RiftLab Riot] participant championName:", participant.championName);
   console.info("[RiftLab Riot] participant teamPosition:", position);
@@ -40,6 +45,7 @@ export function summarizeParticipantMatch(match: RiotMatchDto, puuid: string): R
     position,
     result,
     duration: formatDuration(match.info.gameDuration),
+    durationMinutes: roundTwo(durationMinutes),
     kills: participant.kills,
     deaths: participant.deaths,
     assists: participant.assists,
@@ -48,9 +54,17 @@ export function summarizeParticipantMatch(match: RiotMatchDto, puuid: string): R
     goldEarned: participant.goldEarned,
     goldPerMinute: Math.round(participant.goldEarned / durationMinutes),
     visionScore: participant.visionScore,
+    teamKills,
+    killParticipation,
     summonerLevel: participant.summonerLevel ?? null,
     teamSide: getTeamSide(participant.teamId),
   };
+}
+
+function getTeamKills(match: RiotMatchDto, teamId: number): number {
+  return match.info.participants
+    .filter((participant) => participant.teamId === teamId)
+    .reduce((total, participant) => total + participant.kills, 0);
 }
 
 function getTotalCs(participant: RiotParticipantDto): number {
@@ -71,4 +85,8 @@ function formatDuration(durationSeconds: number): string {
 
 function roundOne(value: number): number {
   return Math.round(value * 10) / 10;
+}
+
+function roundTwo(value: number): number {
+  return Math.round(value * 100) / 100;
 }

@@ -3,6 +3,7 @@ import type {
   RiotMatchDto,
   RiotMatchId,
   RiotRegionRouting,
+  RiotTimelineDto,
 } from "@/lib/adapters/riot-types";
 
 const DEFAULT_ACCOUNT_REGION: RiotRegionRouting = "americas";
@@ -131,6 +132,37 @@ export async function getMatchById(matchId: string): Promise<RiotMatchDto> {
   return (await response.json()) as RiotMatchDto;
 }
 
+export async function getMatchTimelineById(matchId: string): Promise<RiotTimelineDto> {
+  const apiKey = process.env.RIOT_API_KEY?.trim();
+
+  if (!apiKey) {
+    throw new RiotApiError("RIOT_API_KEY is not configured.", 503, "RIOT_API_KEY_MISSING");
+  }
+
+  const region = getRiotMatchRegion();
+  const endpoint = new URL(
+    `/lol/match/v5/matches/${encodeURIComponent(matchId)}/timeline`,
+    `https://${region}.api.riotgames.com`,
+  );
+
+  console.info("[RiftLab Riot] selected matchId:", matchId);
+
+  const response = await fetch(endpoint, {
+    headers: {
+      "X-Riot-Token": apiKey,
+    },
+    cache: "no-store",
+  });
+
+  console.info("[RiftLab Riot] Match-V5 timeline response status:", response.status);
+
+  if (!response.ok) {
+    throw await createRiotApiError(response, "RIOT_TIMELINE_NOT_FOUND");
+  }
+
+  return (await response.json()) as RiotTimelineDto;
+}
+
 export function getRiotAccountRegion(): RiotRegionRouting {
   const configuredRegion = process.env.RIOT_ACCOUNT_REGION?.trim().toLowerCase();
 
@@ -161,7 +193,11 @@ export function getRiotMatchRegion(): RiotRegionRouting {
 
 async function createRiotApiError(
   response: Response,
-  notFoundCode: "RIOT_ACCOUNT_NOT_FOUND" | "RIOT_MATCH_IDS_NOT_FOUND" | "RIOT_MATCH_NOT_FOUND",
+  notFoundCode:
+    | "RIOT_ACCOUNT_NOT_FOUND"
+    | "RIOT_MATCH_IDS_NOT_FOUND"
+    | "RIOT_MATCH_NOT_FOUND"
+    | "RIOT_TIMELINE_NOT_FOUND",
 ): Promise<RiotApiError> {
   const fallbackMessage = getDefaultErrorMessage(response.status);
   let message = fallbackMessage;

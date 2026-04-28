@@ -1,12 +1,38 @@
-import type { RiotMatchSummary, TimelineDiagnostics } from "@/lib/reports";
+import {
+  buildStructureLossRelevanceExplanation,
+  generateCausalImpactChains,
+  getCausalConfidenceForLaneRelevance,
+  getGamePhase,
+  getLaneRelevanceForStructureLoss,
+  getStructureLossCost,
+  getStructureLossSeverityForLaneRelevance,
+  type ChainConfidence,
+  type GamePhase,
+  type ImpactChain,
+  type LaneRelevance,
+} from "@/lib/causal-impact/causal-impact-engine";
+import type { EliteMonsterEvent, RiotMatchSummary, TimelineDiagnostics } from "@/lib/reports";
 import type { MetricScore, MetricStatus } from "@/lib/types";
 
 type Severity = "Low" | "Medium" | "High";
+type TeamSide = "Blue" | "Red" | "Unknown";
+
+export type GroupedObjectiveWindow = {
+  startTimestamp: string;
+  endTimestamp: string;
+  objectiveType: string;
+  eventCount: number;
+  killerTeam: TeamSide;
+  label: string;
+};
 
 export type DeathBeforeObjectiveSignal = {
   deathTimestamp: string;
   objectiveTimestamp: string;
+  objectiveEndTimestamp: string;
   objectiveType: string;
+  objectiveWindowLabel: string;
+  objectiveEventCount: number;
   secondsBeforeObjective: number;
   killerTeam: string;
   severity: Severity;
@@ -14,8 +40,11 @@ export type DeathBeforeObjectiveSignal = {
 
 export type DeathAfterObjectiveSignal = {
   objectiveTimestamp: string;
+  objectiveEndTimestamp: string;
   deathTimestamp: string;
   objectiveType: string;
+  objectiveWindowLabel: string;
+  objectiveEventCount: number;
   secondsAfterObjective: number;
   severity: Severity;
 };
@@ -24,7 +53,14 @@ export type StructureLossAfterDeathSignal = {
   deathTimestamp: string;
   buildingTimestamp: string;
   lane: string | null;
+  buildingType: string;
   towerType: string | null;
+  teamAffected: TeamSide;
+  laneRelevance: LaneRelevance;
+  gamePhase: GamePhase;
+  causalConfidence: ChainConfidence;
+  structureLossCost: number;
+  relevanceExplanation: string;
   secondsAfterDeath: number;
   severity: Severity;
 };
@@ -36,6 +72,42 @@ export type GoldCsCheckpointSignal = {
   level: number;
 };
 
+export type GoldProgressionPoint = {
+  minute: number;
+  totalGold: number;
+};
+
+export type CsProgressionPoint = {
+  minute: number;
+  totalCs: number;
+  laneCs: number;
+  jungleCs: number;
+};
+
+export type MetricScorePoint = {
+  label: string;
+  value: number;
+  polarity: "positive" | "cost";
+};
+
+export type EventCountPoint = {
+  label: string;
+  value: number;
+};
+
+export type GoldPerMinuteCheckpointPoint = {
+  minute: number;
+  goldPerMinute: number;
+};
+
+export type TelemetryChartData = {
+  goldProgression: GoldProgressionPoint[];
+  csProgression: CsProgressionPoint[];
+  metricScores: MetricScorePoint[];
+  eventCounts: EventCountPoint[];
+  goldPerMinuteCheckpoints: GoldPerMinuteCheckpointPoint[];
+};
+
 export type RealScoringSignals = {
   deathFrequency: {
     deathCount: number;
@@ -43,6 +115,7 @@ export type RealScoringSignals = {
     highDeathFrequency: boolean;
     severity: Severity;
   };
+  objectiveWindows: GroupedObjectiveWindow[];
   deathBeforeObjective: DeathBeforeObjectiveSignal[];
   deathAfterObjective: DeathAfterObjectiveSignal[];
   structureLossAfterDeath: StructureLossAfterDeathSignal[];
@@ -72,6 +145,8 @@ export type PreliminaryRiftLabReport = {
   evidence: string[];
   metrics: MetricScore[];
   signals: RealScoringSignals;
+  impactChains: ImpactChain[];
+  telemetryCharts: TelemetryChartData;
 };
 
 export function generatePreliminaryRiftLabReport(
@@ -79,14 +154,37 @@ export function generatePreliminaryRiftLabReport(
   diagnostics: TimelineDiagnostics,
 ): PreliminaryRiftLabReport {
   const signals = detectRealScoringSignals(summary, diagnostics);
-  const metrics = generateMetricScores(summary, signals);
+  const impactChains = generateCausalImpactChains({
+    summary,
+    diagnostics,
+    objectiveWindows: signals.objectiveWindows,
+  });
+  const metrics = generateMetricScores(summary, signals, impactChains);
   const strongestMetric = metrics
     .filter((metric) => metric.polarity !== "cost")
     .sort((a, b) => b.score - a.score)[0];
   const valueLost = metrics.find((metric) => metric.name === "Value Lost");
   const evidence = buildEvidence(summary, signals);
+  const telemetryCharts = generateTelemetryChartData(diagnostics, metrics, signals, impactChains, summary);
 
   console.info("[RiftLab scoring v0.1] detected deaths:", signals.deathFrequency.deathCount);
+  console.info("[RiftLab scoring v0.1] raw elite monster events:", diagnostics.eliteMonsterEvents.length);
+  console.info("[RiftLab scoring v0.1] grouped objective windows:", signals.objectiveWindows.length);
+  console.info(
+    "[RiftLab scoring v0.1] grouped objective window detail:",
+    signals.objectiveWindows.length > 0
+      ? signals.objectiveWindows
+          .map(
+            (window) =>
+              `${window.objectiveType} ${window.startTimestamp}-${window.endTimestamp} (${window.eventCount} event(s))`,
+          )
+          .join(", ")
+      : "none",
+  );
+  console.info(
+    "[RiftLab scoring v0.1] death-before-objective count after grouping:",
+    signals.deathBeforeObjective.length,
+  );
   console.info(
     "[RiftLab scoring v0.1] detected objective windows:",
     signals.deathBeforeObjective.length + signals.deathAfterObjective.length,
@@ -99,21 +197,32 @@ export function generatePreliminaryRiftLabReport(
     "[RiftLab scoring v0.1] generated metric scores:",
     metrics.map((metric) => `${metric.name}: ${metric.score}`).join(", "),
   );
+  console.info("[RiftLab charts v0.1] chart data generated:", {
+    generated: true,
+    goldPoints: telemetryCharts.goldProgression.length,
+    csPoints: telemetryCharts.csProgression.length,
+    metricScoreCount: telemetryCharts.metricScores.length,
+    eventCountSummary: telemetryCharts.eventCounts
+      .map((point) => `${point.label}: ${point.value}`)
+      .join(", "),
+  });
 
   return {
     title: "Preliminary Riot API report v0.1",
-    mainValueSource: buildMainValueSource(summary, strongestMetric),
-    mainValueLoss: buildMainValueLoss(summary, signals, valueLost),
-    mainImprovementPriority: buildImprovementPriority(signals),
+    mainValueSource: buildMainValueSource(summary, signals, strongestMetric, impactChains),
+    mainValueLoss: buildMainValueLoss(summary, signals, valueLost, impactChains),
+    mainImprovementPriority: buildImprovementPriority(signals, impactChains),
     confidence: "Medium",
     confidenceNotes: [
       "High confidence: deaths, objectives, structures, gold, CS, level, KDA, and vision are direct Riot API fields.",
       "Medium confidence: pressure, objective contribution, and conversion are inferred from event timing windows.",
-      "Low confidence: positioning intent, vision intent, wave state, and team communication are not analyzed yet.",
+      "Low confidence: positioning intent, vision intent, wave state, and team communication are not inferred from Riot API alone.",
     ],
     evidence,
     metrics,
     signals,
+    impactChains,
+    telemetryCharts,
   };
 }
 
@@ -123,8 +232,9 @@ export function detectRealScoringSignals(
 ): RealScoringSignals {
   const deathCount = diagnostics.playerDeaths.length;
   const deathsPerMinute = roundTwo(deathCount / Math.max(summary.durationMinutes, 1));
-  const deathBeforeObjective = detectDeathsBeforeObjectives(diagnostics);
-  const deathAfterObjective = detectDeathsAfterObjectives(diagnostics);
+  const objectiveWindows = groupObjectiveWindows(diagnostics.eliteMonsterEvents);
+  const deathBeforeObjective = detectDeathsBeforeObjectives(summary, diagnostics, objectiveWindows);
+  const deathAfterObjective = detectDeathsAfterObjectives(diagnostics, objectiveWindows);
   const structureLossAfterDeath = detectStructureLossAfterDeath(summary, diagnostics);
   const goldCsProgression = detectGoldCsProgression(summary, diagnostics);
   const directContribution = detectDirectContribution(summary);
@@ -136,6 +246,7 @@ export function detectRealScoringSignals(
       highDeathFrequency: deathCount >= 5 || deathsPerMinute >= 0.22,
       severity: deathCount >= 6 || deathsPerMinute >= 0.28 ? "High" : deathCount >= 4 ? "Medium" : "Low",
     },
+    objectiveWindows,
     deathBeforeObjective,
     deathAfterObjective,
     structureLossAfterDeath,
@@ -144,14 +255,18 @@ export function detectRealScoringSignals(
   };
 }
 
-function detectDeathsBeforeObjectives(diagnostics: TimelineDiagnostics): DeathBeforeObjectiveSignal[] {
+function detectDeathsBeforeObjectives(
+  summary: RiotMatchSummary,
+  diagnostics: TimelineDiagnostics,
+  objectiveWindows: ObjectiveWindowInternal[],
+): DeathBeforeObjectiveSignal[] {
   return diagnostics.playerDeaths.flatMap((death) => {
     const deathSeconds = parseTimestamp(death.timestamp);
 
-    return diagnostics.eliteMonsterEvents
-      .map((objective) => {
-        const objectiveSeconds = parseTimestamp(objective.timestamp);
-        const secondsBeforeObjective = objectiveSeconds - deathSeconds;
+    return objectiveWindows
+      .filter((window) => window.killerTeam !== summary.teamSide)
+      .map((window) => {
+        const secondsBeforeObjective = window.startSeconds - deathSeconds;
 
         if (secondsBeforeObjective <= 0 || secondsBeforeObjective > 90) {
           return null;
@@ -159,10 +274,13 @@ function detectDeathsBeforeObjectives(diagnostics: TimelineDiagnostics): DeathBe
 
         const signal: DeathBeforeObjectiveSignal = {
           deathTimestamp: death.timestamp,
-          objectiveTimestamp: objective.timestamp,
-          objectiveType: objective.monsterType,
+          objectiveTimestamp: window.startTimestamp,
+          objectiveEndTimestamp: window.endTimestamp,
+          objectiveType: window.objectiveType,
+          objectiveWindowLabel: window.label,
+          objectiveEventCount: window.eventCount,
           secondsBeforeObjective,
-          killerTeam: objective.killerTeam,
+          killerTeam: window.killerTeam,
           severity: secondsBeforeObjective <= 45 ? "High" : "Medium",
         };
 
@@ -172,23 +290,27 @@ function detectDeathsBeforeObjectives(diagnostics: TimelineDiagnostics): DeathBe
   });
 }
 
-function detectDeathsAfterObjectives(diagnostics: TimelineDiagnostics): DeathAfterObjectiveSignal[] {
-  return diagnostics.eliteMonsterEvents.flatMap((objective) => {
-    const objectiveSeconds = parseTimestamp(objective.timestamp);
-
+function detectDeathsAfterObjectives(
+  diagnostics: TimelineDiagnostics,
+  objectiveWindows: ObjectiveWindowInternal[],
+): DeathAfterObjectiveSignal[] {
+  return objectiveWindows.flatMap((window) => {
     return diagnostics.playerDeaths
       .map((death) => {
         const deathSeconds = parseTimestamp(death.timestamp);
-        const secondsAfterObjective = deathSeconds - objectiveSeconds;
+        const secondsAfterObjective = deathSeconds - window.endSeconds;
 
         if (secondsAfterObjective <= 0 || secondsAfterObjective > 45) {
           return null;
         }
 
         const signal: DeathAfterObjectiveSignal = {
-          objectiveTimestamp: objective.timestamp,
+          objectiveTimestamp: window.startTimestamp,
+          objectiveEndTimestamp: window.endTimestamp,
           deathTimestamp: death.timestamp,
-          objectiveType: objective.monsterType,
+          objectiveType: window.objectiveType,
+          objectiveWindowLabel: window.label,
+          objectiveEventCount: window.eventCount,
           secondsAfterObjective,
           severity: secondsAfterObjective <= 25 ? "Medium" : "Low",
         };
@@ -197,6 +319,76 @@ function detectDeathsAfterObjectives(diagnostics: TimelineDiagnostics): DeathAft
       })
       .filter((signal): signal is DeathAfterObjectiveSignal => signal !== null);
   });
+}
+
+type ObjectiveWindowInternal = GroupedObjectiveWindow & {
+  typeKey: string;
+  startSeconds: number;
+  endSeconds: number;
+};
+
+function groupObjectiveWindows(eliteMonsterEvents: EliteMonsterEvent[]): ObjectiveWindowInternal[] {
+  return [...eliteMonsterEvents]
+    .sort((a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp))
+    .reduce<ObjectiveWindowInternal[]>((windows, event) => {
+      const eventSeconds = parseTimestamp(event.timestamp);
+      const typeKey = getObjectiveTypeKey(event.monsterType);
+      const objectiveType = getObjectiveDisplayType(event.monsterType);
+      const previousWindow = windows.at(-1);
+
+      if (
+        previousWindow &&
+        previousWindow.typeKey === typeKey &&
+        eventSeconds - previousWindow.endSeconds <= 60
+      ) {
+        previousWindow.endTimestamp = event.timestamp;
+        previousWindow.endSeconds = eventSeconds;
+        previousWindow.eventCount += 1;
+        previousWindow.killerTeam =
+          previousWindow.killerTeam === event.killerTeam ? previousWindow.killerTeam : "Unknown";
+        previousWindow.label = formatObjectiveWindowLabel(previousWindow);
+        return windows;
+      }
+
+      const window: ObjectiveWindowInternal = {
+        typeKey,
+        startTimestamp: event.timestamp,
+        endTimestamp: event.timestamp,
+        startSeconds: eventSeconds,
+        endSeconds: eventSeconds,
+        objectiveType,
+        eventCount: 1,
+        killerTeam: event.killerTeam,
+        label: "",
+      };
+      window.label = formatObjectiveWindowLabel(window);
+
+      windows.push(window);
+      return windows;
+    }, []);
+}
+
+function getObjectiveTypeKey(monsterType: string): string {
+  const normalized = monsterType.toUpperCase();
+
+  if (normalized === "HORDE" || normalized.includes("VOIDGRUB")) {
+    return "HORDE";
+  }
+
+  return normalized;
+}
+
+function getObjectiveDisplayType(monsterType: string): string {
+  return getObjectiveTypeKey(monsterType) === "HORDE" ? "Voidgrubs/Horde" : monsterType;
+}
+
+function formatObjectiveWindowLabel(window: Pick<GroupedObjectiveWindow, "startTimestamp" | "endTimestamp" | "objectiveType">): string {
+  const timestampRange =
+    window.startTimestamp === window.endTimestamp
+      ? window.startTimestamp
+      : `${window.startTimestamp}\u2013${window.endTimestamp}`;
+
+  return `${window.objectiveType} window ${timestampRange}`;
 }
 
 function detectStructureLossAfterDeath(
@@ -219,13 +411,48 @@ function detectStructureLossAfterDeath(
           return null;
         }
 
+        const towerOrBuildingType = building.towerType ?? building.buildingType;
+        const laneRelevance = getLaneRelevanceForStructureLoss(
+          summary.position,
+          building.laneType,
+          towerOrBuildingType,
+          buildingSeconds,
+        );
+        const gamePhase = getGamePhase(buildingSeconds);
+        const originalSeverity = secondsAfterDeath <= 40 ? "High" : "Medium";
+        const adjustedSeverity = getStructureLossSeverityForLaneRelevance(laneRelevance, originalSeverity);
+        const structureLossCost = getStructureLossCost(laneRelevance);
+
+        console.info("[RiftLab scoring v0.1] structure lane relevance decision:", {
+          structureLane: building.laneType,
+          playerRole: summary.position,
+          gamePhase,
+          laneRelevance,
+          originalSeverity,
+          adjustedSeverity,
+          finalScoreDelta: -structureLossCost,
+        });
+
         const signal: StructureLossAfterDeathSignal = {
           deathTimestamp: death.timestamp,
           buildingTimestamp: building.timestamp,
           lane: building.laneType,
+          buildingType: building.buildingType,
           towerType: building.towerType,
+          teamAffected: building.teamAffected,
+          laneRelevance,
+          gamePhase,
+          causalConfidence: getCausalConfidenceForLaneRelevance(laneRelevance),
+          structureLossCost,
+          relevanceExplanation: buildStructureLossRelevanceExplanation(
+            summary.position,
+            building.laneType,
+            towerOrBuildingType,
+            gamePhase,
+            laneRelevance,
+          ),
           secondsAfterDeath,
-          severity: secondsAfterDeath <= 40 ? "High" : "Medium",
+          severity: adjustedSeverity,
         };
 
         return signal;
@@ -287,7 +514,15 @@ function detectDirectContribution(summary: RiotMatchSummary): RealScoringSignals
   };
 }
 
-function generateMetricScores(summary: RiotMatchSummary, signals: RealScoringSignals): MetricScore[] {
+function generateMetricScores(
+  summary: RiotMatchSummary,
+  signals: RealScoringSignals,
+  impactChains: ImpactChain[],
+): MetricScore[] {
+  const directValueExplanation = shouldUsePlayableCsDirectValueExplanation(summary, signals)
+    ? "CS progression stayed playable, but Direct Value was heavily reduced by low kill participation, poor KDA, and low gold/min."
+    : "Basic direct contribution from KDA, CS, gold, kill participation, and vision.";
+  const structureLossCost = getTotalStructureLossCost(signals.structureLossAfterDeath);
   const directValue = clampScore(
     50 +
       scoreCs(summary.csPerMinute) +
@@ -299,17 +534,22 @@ function generateMetricScores(summary: RiotMatchSummary, signals: RealScoringSig
   const valueLost = clampScore(
     signals.deathFrequency.deathCount * 8 +
       signals.deathBeforeObjective.length * 15 +
-      signals.structureLossAfterDeath.length * 12 +
-      signals.deathAfterObjective.length * 6,
+      structureLossCost +
+      signals.deathAfterObjective.length * 6 +
+      getChainMetricPenalty(impactChains, "Value Lost", 10),
   );
-  const objectiveContribution = clampScore(
-    50 - signals.deathBeforeObjective.length * 12 - signals.deathAfterObjective.length * 5,
-  );
+  const rawObjectiveContribution =
+    50 -
+    signals.deathBeforeObjective.length * 12 -
+    signals.deathAfterObjective.length * 5 +
+    getChainMetricDelta(impactChains, "Objective Contribution", 8);
+  const objectiveContribution = clampObjectiveContribution(rawObjectiveContribution, summary);
   const pressureValue = clampScore(
     50 -
-      signals.structureLossAfterDeath.length * 12 -
+      structureLossCost -
       (signals.deathFrequency.highDeathFrequency ? 8 : 0) +
-      (signals.goldCsProgression.stableCs ? 5 : 0),
+      (signals.goldCsProgression.stableCs ? 5 : 0) +
+      getChainMetricDelta(impactChains, "Pressure Value", 8),
   );
   const informationValue = clampScore(
     45 + (summary.visionScore / Math.max(summary.durationMinutes, 1) - 0.45) * 35,
@@ -318,11 +558,12 @@ function generateMetricScores(summary: RiotMatchSummary, signals: RealScoringSig
     50 -
       (signals.directContribution.killParticipation === 0 ? 15 : 0) -
       signals.deathAfterObjective.length * 8 +
-      (signals.directContribution.killParticipation && signals.directContribution.killParticipation >= 0.55 ? 8 : 0),
+      (signals.directContribution.killParticipation && signals.directContribution.killParticipation >= 0.55 ? 8 : 0) +
+      getChainMetricDelta(impactChains, "Conversion Value", 10),
   );
 
   return [
-    metric("Direct Value", directValue, "Basic direct contribution from KDA, CS, gold, kill participation, and vision.", [
+    metric("Direct Value", directValue, directValueExplanation, [
       `KDA ratio: ${signals.directContribution.kdaRatio}.`,
       `CS/min: ${summary.csPerMinute}, gold/min: ${summary.goldPerMinute}.`,
       `Kill participation: ${
@@ -330,7 +571,7 @@ function generateMetricScores(summary: RiotMatchSummary, signals: RealScoringSig
       }.`,
     ]),
     metric("Pressure Value", pressureValue, "Conservative proxy based on deaths that were followed by structure loss.", [
-      `${signals.structureLossAfterDeath.length} structure loss window(s) detected after player deaths.`,
+      `${signals.structureLossAfterDeath.length} structure loss window(s) detected after player deaths, weighted to ${structureLossCost} cost by lane relevance.`,
       signals.goldCsProgression.stableCs ? "CS progression stayed playable." : "CS progression looked weak.",
     ]),
     metric("Information Value", informationValue, "Vision score is used as a simple proxy until ward intent is analyzed.", [
@@ -340,6 +581,10 @@ function generateMetricScores(summary: RiotMatchSummary, signals: RealScoringSig
     metric("Objective Contribution", objectiveContribution, "Objective contribution is reduced by deaths near objective windows.", [
       `${signals.deathBeforeObjective.length} death-before-objective window(s).`,
       `${signals.deathAfterObjective.length} post-objective tempo loss window(s).`,
+      `${getChainsAffectingMetric(impactChains, "Objective Contribution").length} causal chain(s) affected this metric.`,
+      objectiveContribution === 15 && rawObjectiveContribution < 15
+        ? "A minimum floor is applied because some measurable participation was present."
+        : "Score reflects grouped objective timing windows.",
     ]),
     metric("Conversion Value", conversionValue, "Basic conversion proxy from kill participation and post-objective deaths.", [
       `Team kills: ${summary.teamKills}.`,
@@ -349,15 +594,91 @@ function generateMetricScores(summary: RiotMatchSummary, signals: RealScoringSig
     ]),
     metric("Value Lost", valueLost, "Penalty signal from deaths, objective windows, and structure losses after death.", [
       `${signals.deathFrequency.deathCount} player death(s).`,
-      `${signals.deathBeforeObjective.length} death(s) before elite objective(s).`,
-      `${signals.structureLossAfterDeath.length} structure loss window(s) after death.`,
+      `${signals.deathBeforeObjective.length} death-before-objective window(s).`,
+      `${signals.structureLossAfterDeath.length} structure loss window(s) after death, weighted by lane relevance.`,
+      `${getChainsAffectingMetric(impactChains, "Value Lost").length} causal chain(s) affected this metric.`,
     ], { polarity: "cost", displayValue: `Risk Cost: ${getRiskLabel(valueLost)}` }),
   ];
 }
 
-function buildMainValueSource(summary: RiotMatchSummary, strongestMetric: MetricScore | undefined): string {
+function getTotalStructureLossCost(structureLossSignals: StructureLossAfterDeathSignal[]): number {
+  return structureLossSignals.reduce((total, signal) => total + signal.structureLossCost, 0);
+}
+
+function getChainsAffectingMetric(impactChains: ImpactChain[], metricName: string): ImpactChain[] {
+  return impactChains.filter((chain) => chain.affectedMetrics.includes(metricName));
+}
+
+function getChainMetricDelta(impactChains: ImpactChain[], metricName: string, cap: number): number {
+  const total = getChainsAffectingMetric(impactChains, metricName).reduce(
+    (sum, chain) => sum + chain.valueDelta.scoreImpact,
+    0,
+  );
+
+  return Math.max(-cap, Math.min(cap, total));
+}
+
+function getChainMetricPenalty(impactChains: ImpactChain[], metricName: string, cap: number): number {
+  const total = getChainsAffectingMetric(impactChains, metricName)
+    .filter((chain) => chain.valueDelta.scoreImpact < 0)
+    .reduce((sum, chain) => sum + Math.abs(chain.valueDelta.scoreImpact), 0);
+
+  return Math.min(cap, total);
+}
+
+function shouldUsePlayableCsDirectValueExplanation(
+  summary: RiotMatchSummary,
+  signals: RealScoringSignals,
+): boolean {
+  const flags = signals.directContribution.lowContributionFlags;
+
+  return (
+    summary.csPerMinute >= 6 &&
+    flags.includes("Low kill participation") &&
+    flags.includes("Poor KDA ratio") &&
+    flags.includes("Low gold per minute")
+  );
+}
+
+function clampObjectiveContribution(
+  rawScore: number,
+  summary: RiotMatchSummary,
+): number {
+  const hasMeasurableParticipation =
+    summary.kills > 0 ||
+    summary.assists > 0 ||
+    summary.totalCs > 0 ||
+    summary.visionScore > 0;
+
+  if (!hasMeasurableParticipation) {
+    return clampScore(rawScore);
+  }
+
+  return clampScore(Math.max(rawScore, 15));
+}
+
+function buildMainValueSource(
+  summary: RiotMatchSummary,
+  signals: RealScoringSignals,
+  strongestMetric: MetricScore | undefined,
+  impactChains: ImpactChain[],
+): string {
+  const strongestPositiveChain = impactChains.find(
+    (chain) => chain.classification === "positive" && chain.valueDirection === "generated",
+  );
+
+  if (strongestPositiveChain) {
+    return `Your clearest positive chain was ${strongestPositiveChain.title} ${strongestPositiveChain.userFacingSummary}`;
+  }
+
   if (!strongestMetric) {
     return "The strongest value source is not clear from the current Riot API-only pass.";
+  }
+
+  if (strongestMetric.score < 55) {
+    return signals.goldCsProgression.stableCs
+      ? "No strong positive causal chain was detected in this preliminary pass. The most stable signal was CS progression, but it did not convert into measurable map impact."
+      : "No strong positive causal chain was detected in this preliminary pass.";
   }
 
   if (strongestMetric.name === "Direct Value") {
@@ -371,7 +692,23 @@ function buildMainValueLoss(
   summary: RiotMatchSummary,
   signals: RealScoringSignals,
   valueLost: MetricScore | undefined,
+  impactChains: ImpactChain[],
 ): string {
+  const negativeChains = impactChains.filter((chain) => chain.classification === "negative");
+
+  if (negativeChains.length > 0) {
+    const hasEnemyObjectiveChain = negativeChains.some((chain) => chain.chainType === "death_to_enemy_objective");
+    const hasStructureLossChain = negativeChains.some((chain) => chain.chainType === "death_to_structure_loss");
+    const chainSummary = [
+      hasEnemyObjectiveChain ? "deaths before enemy objective windows" : null,
+      hasStructureLossChain ? "high-relevance deaths followed by allied structure loss" : null,
+    ].filter(Boolean);
+
+    return `The largest value loss came from ${negativeChains.length} negative impact chain(s): ${
+      chainSummary.length > 0 ? chainSummary.join(" and ") : negativeChains[0].title
+    }. API confirms the event sequence, not the full decision context.`;
+  }
+
   if (signals.deathBeforeObjective.length > 0 || signals.structureLossAfterDeath.length > 0) {
     return `The largest value loss came from ${signals.deathFrequency.deathCount} death(s), including ${signals.deathBeforeObjective.length} death-before-objective window(s) and ${signals.structureLossAfterDeath.length} structure loss window(s) after death.`;
   }
@@ -385,13 +722,26 @@ function buildMainValueLoss(
     : "No major value loss signal was detected from deaths, objectives, or structures.";
 }
 
-function buildImprovementPriority(signals: RealScoringSignals): string {
+function buildImprovementPriority(signals: RealScoringSignals, impactChains: ImpactChain[]): string {
+  const enemyObjectiveChain = impactChains.find((chain) => chain.chainType === "death_to_enemy_objective");
+  const highRelevanceStructureChain = impactChains.find(
+    (chain) => chain.chainType === "death_to_structure_loss" && chain.laneRelevance === "high",
+  );
+
+  if (enemyObjectiveChain) {
+    return "Prioritize staying alive during enemy objective timing windows. This version can see the timing cost, but not yet the vision, wave, or positioning context.";
+  }
+
+  if (highRelevanceStructureChain) {
+    return "Prioritize deaths that are followed by high-relevance allied structure-loss windows. Future VOD context can refine lane assignment, wave state, and rotation context.";
+  }
+
   if (signals.deathBeforeObjective.length > 0) {
     return "Prioritize staying alive during the 90 seconds before neutral objectives. This version can see the timing cost, but not yet the vision or wave context.";
   }
 
   if (signals.structureLossAfterDeath.length > 0) {
-    return "Prioritize side-lane and post-fight discipline when structures are exposed. Deaths that lead to towers are high-cost windows.";
+    return "Prioritize side-lane and post-fight discipline when structures are exposed. This version weights tower-loss associations by role, lane, and game phase.";
   }
 
   if (signals.directContribution.lowContributionFlags.length > 0) {
@@ -404,8 +754,8 @@ function buildImprovementPriority(signals: RealScoringSignals): string {
 function buildEvidence(summary: RiotMatchSummary, signals: RealScoringSignals): string[] {
   const evidence = [
     `${signals.deathFrequency.deathCount} deaths over ${summary.duration} (${signals.deathFrequency.deathsPerMinute} deaths/min).`,
-    `${signals.deathBeforeObjective.length} deaths happened within 90 seconds before elite monster events.`,
-    `${signals.structureLossAfterDeath.length} structures affecting your team fell within 75 seconds after your deaths.`,
+    `${signals.deathBeforeObjective.length} death-before-objective window(s) happened within 90 seconds before grouped elite objective windows.`,
+    `${signals.structureLossAfterDeath.length} allied structure-loss association(s) were found within 75 seconds after your deaths and weighted by lane relevance.`,
     `Final direct line: ${summary.kills}/${summary.deaths}/${summary.assists}, ${summary.csPerMinute} CS/min, ${summary.goldPerMinute} gold/min.`,
   ];
 
@@ -418,6 +768,62 @@ function buildEvidence(summary: RiotMatchSummary, signals: RealScoringSignals): 
   }
 
   return evidence;
+}
+
+function generateTelemetryChartData(
+  diagnostics: TimelineDiagnostics,
+  metrics: MetricScore[],
+  signals: RealScoringSignals,
+  impactChains: ImpactChain[],
+  summary: RiotMatchSummary,
+): TelemetryChartData {
+  const goldProgression = diagnostics.frameSnapshots.map((snapshot) => ({
+    minute: snapshot.minute,
+    totalGold: snapshot.totalGold,
+  }));
+  const csProgression = diagnostics.frameSnapshots.map((snapshot) => ({
+    minute: snapshot.minute,
+    totalCs: snapshot.minionsKilled + snapshot.jungleMinionsKilled,
+    laneCs: snapshot.minionsKilled,
+    jungleCs: snapshot.jungleMinionsKilled,
+  }));
+  const metricScores: MetricScorePoint[] = metrics.map((metric) => ({
+    label: metric.name === "Value Lost" ? "Value Lost (Risk Cost)" : metric.name,
+    value: metric.score,
+    polarity: metric.polarity === "cost" ? "cost" : "positive",
+  }));
+  const enemyObjectiveWindows = signals.objectiveWindows.filter(
+    (window) => window.killerTeam !== "Unknown" && window.killerTeam !== summary.teamSide,
+  ).length;
+  const alliedObjectiveWindows = signals.objectiveWindows.filter(
+    (window) => window.killerTeam === summary.teamSide,
+  ).length;
+  const positiveChains = impactChains.filter((chain) => chain.classification === "positive").length;
+  const negativeChains = impactChains.filter((chain) => chain.classification === "negative").length;
+  const neutralTradeChains = impactChains.filter(
+    (chain) => chain.classification === "neutral" || chain.classification === "trade",
+  ).length;
+  const eventCounts = [
+    { label: "Deaths", value: signals.deathFrequency.deathCount },
+    { label: "Enemy objective windows", value: enemyObjectiveWindows },
+    { label: "Allied objective windows", value: alliedObjectiveWindows },
+    { label: "Structure-loss windows", value: signals.structureLossAfterDeath.length },
+    { label: "Positive chains", value: positiveChains },
+    { label: "Negative chains", value: negativeChains },
+    { label: "Neutral/trade chains", value: neutralTradeChains },
+  ];
+  const goldPerMinuteCheckpoints = diagnostics.frameSnapshots.map((snapshot) => ({
+    minute: snapshot.minute,
+    goldPerMinute: Math.round(snapshot.totalGold / Math.max(snapshot.minute, 1)),
+  }));
+
+  return {
+    goldProgression,
+    csProgression,
+    metricScores,
+    eventCounts,
+    goldPerMinuteCheckpoints,
+  };
 }
 
 function metric(

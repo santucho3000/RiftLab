@@ -2,6 +2,25 @@
 
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  getChainPriorityLabel,
+  getUserFacingChainTypeLabel,
+} from "@/lib/causal-impact/causal-impact-engine";
+import {
+  formatLaneForUser,
+  formatStructureForUser,
+} from "@/lib/formatters/riot-display";
 import type { RiotMatchSummary, TimelineDiagnostics } from "@/lib/reports";
 import { generatePreliminaryRiftLabReport } from "@/lib/scoring";
 import type { PreliminaryRiftLabReport } from "@/lib/scoring";
@@ -404,6 +423,8 @@ function PreliminaryReportPanel({ report }: { report: PreliminaryRiftLabReport }
         />
       </div>
 
+      <CausalImpactChainsSection report={report} />
+      <TelemetryChartsSection report={report} />
       <DetectedWindowList report={report} />
     </section>
   );
@@ -479,21 +500,291 @@ function SignalSummary({ label, value, detail }: { label: string; value: string;
   );
 }
 
+function CausalImpactChainsSection({ report }: { report: PreliminaryRiftLabReport }) {
+  if (report.impactChains.length === 0) {
+    return (
+      <div className="mt-7 rounded-md border border-white/[0.07] bg-black/20 p-4">
+        <p className="label-muted">Causal Impact Chains</p>
+        <p className="mt-3 text-sm leading-6 text-lab-muted">
+          No causal impact chains were detected in this preliminary Riot API-only pass.
+        </p>
+      </div>
+    );
+  }
+
+  const visibleChains = report.impactChains.slice(0, 5);
+  const hiddenChainCount = Math.max(report.impactChains.length - visibleChains.length, 0);
+
+  return (
+    <div className="mt-7 rounded-md border border-white/[0.07] bg-black/20 p-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="label-muted">Top Causal Impact Chains</p>
+          <h6 className="mt-2 text-lg font-semibold text-lab-text">Timing-based impact paths</h6>
+        </div>
+        <p className="text-sm text-lab-muted">{visibleChains.length} shown / {report.impactChains.length} detected</p>
+      </div>
+      {hiddenChainCount > 0 ? (
+        <p className="mt-3 text-sm leading-6 text-lab-muted">
+          {hiddenChainCount} additional low-priority chain(s) detected.
+        </p>
+      ) : null}
+      <div className="mt-4 grid gap-3 xl:grid-cols-2">
+        {visibleChains.map((chain) => (
+          <article key={chain.id} className="rounded-md border border-white/[0.06] bg-lab-panel2/50 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="font-semibold text-lab-text">{chain.title}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">{chain.userFacingSummary}</p>
+              </div>
+              <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end">
+                <ChainBadge value={chain.classification} />
+                <ChainBadge value={chain.severity} />
+                {chain.causalConfidence === "low" ? <ChainBadge value="low-confidence" /> : null}
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-2 text-xs text-lab-muted sm:grid-cols-2">
+              <ChainFact label="Type" value={getUserFacingChainTypeLabel(chain)} />
+              <ChainFact label="Time" value={`${chain.startTime} to ${chain.endTime}`} />
+              <ChainFact label="Classification" value={chain.classification} />
+              <ChainFact label="Value" value={chain.valueDirection} />
+              <ChainFact label="Evidence" value={chain.evidenceConfidence} />
+              <ChainFact label="Causality" value={chain.causalConfidence} />
+              {chain.laneRelevance ? <ChainFact label="Lane relevance" value={chain.laneRelevance} /> : null}
+              {chain.importanceScore !== undefined ? (
+                <ChainFact label="Priority" value={getChainPriorityLabel(chain.importanceScore)} />
+              ) : null}
+              <ChainFact label="Delta" value={`${chain.valueDelta.label} (${chain.valueDelta.scoreImpact})`} />
+            </div>
+
+            <div className="mt-4 space-y-2 text-sm leading-6 text-slate-300">
+              <ChainStep label="Cause" value={chain.cause.description} />
+              <ChainStep label="Window" value={chain.window.description} />
+              <ChainStep label="Consequence" value={chain.consequence.description} />
+              <ChainStep label="Map impact" value={chain.mapImpact.description} />
+            </div>
+
+            <p className="mt-4 text-xs leading-5 text-lab-muted">
+              Affected metrics: {chain.affectedMetrics.join(", ")}.
+            </p>
+            {chain.supportingChainIds && chain.supportingChainIds.length > 0 ? (
+              <p className="mt-2 text-xs leading-5 text-lab-muted">
+                Supporting lower-priority chain(s): {chain.supportingChainIds.length}.
+              </p>
+            ) : null}
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ChainBadge({ value }: { value: string }) {
+  const tone =
+    value === "positive" || value === "High"
+      ? "border-lab-green/25 bg-lab-green/[0.06] text-lab-green"
+      : value === "negative" || value === "low-confidence"
+        ? "border-lab-red/25 bg-lab-red/[0.06] text-lab-red"
+        : value === "trade" || value === "neutral" || value === "Low"
+          ? "border-lab-amber/25 bg-lab-amber/[0.06] text-lab-amber"
+          : "border-lab-cyan/25 bg-lab-cyan/[0.06] text-lab-cyan";
+
+  return (
+    <span className={`w-fit rounded-md border px-2 py-1 text-xs font-semibold ${tone}`}>
+      {value}
+    </span>
+  );
+}
+
+function ChainFact({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-md border border-white/[0.06] bg-black/20 px-3 py-2">
+      <span className="font-semibold text-slate-400">{label}: </span>
+      <span>{value}</span>
+    </div>
+  );
+}
+
+function ChainStep({ label, value }: { label: string; value: string }) {
+  return (
+    <p className="border-l border-lab-cyan/20 pl-3">
+      <span className="font-semibold text-slate-200">{label}: </span>
+      {value}
+    </p>
+  );
+}
+
+function TelemetryChartsSection({ report }: { report: PreliminaryRiftLabReport }) {
+  return (
+    <section className="mt-7 rounded-md border border-white/[0.07] bg-black/20 p-4">
+      <div>
+        <p className="label-muted">Telemetry Charts</p>
+        <h6 className="mt-2 text-lg font-semibold text-lab-text">Real API progression signals</h6>
+        <p className="mt-2 text-sm leading-6 text-lab-muted">
+          These charts use Match-V5 detail and timeline fields only. They do not infer wave state,
+          positioning, rotation quality, or vision intent.
+        </p>
+      </div>
+      <div className="mt-5 grid gap-4 xl:grid-cols-2">
+        <TelemetryLineChart
+          title="Gold progression"
+          subtitle="Player total gold from timeline frame snapshots."
+          data={report.telemetryCharts.goldProgression}
+          dataKey="totalGold"
+          emptyText="Not enough timeline data to render this chart."
+        />
+        <TelemetryLineChart
+          title="CS progression"
+          subtitle="Total CS with lane and jungle CS retained in chart data."
+          data={report.telemetryCharts.csProgression}
+          dataKey="totalCs"
+          emptyText="Not enough timeline data to render this chart."
+        />
+        <TelemetryBarChart
+          title="Metric scores"
+          subtitle="Value Lost is a cost/risk signal, not a positive contribution score."
+          data={report.telemetryCharts.metricScores}
+          dataKey="value"
+          emptyText="No metric score data available."
+          color="#45D4FF"
+        />
+        <TelemetryBarChart
+          title="Event counts"
+          subtitle="Counts from detected API windows and causal chains."
+          data={report.telemetryCharts.eventCounts}
+          dataKey="value"
+          emptyText="No event count data available."
+          color="#F6C85F"
+        />
+        <TelemetryLineChart
+          title="Gold/min checkpoints"
+          subtitle="Gold per minute at available timeline snapshot checkpoints."
+          data={report.telemetryCharts.goldPerMinuteCheckpoints}
+          dataKey="goldPerMinute"
+          emptyText="Not enough timeline data to render this chart."
+        />
+      </div>
+    </section>
+  );
+}
+
+const chartAxisStyle = {
+  tick: { fill: "#92A0B4", fontSize: 12 },
+  axisLine: { stroke: "#202A38" },
+  tickLine: { stroke: "#202A38" },
+};
+
+const chartTooltipStyle = {
+  backgroundColor: "#0D121B",
+  border: "1px solid rgba(255,255,255,0.12)",
+  borderRadius: 6,
+  color: "#E7EEF8",
+};
+
+function TelemetryChartFrame({
+  title,
+  subtitle,
+  isEmpty,
+  emptyText,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  isEmpty: boolean;
+  emptyText: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <article className="rounded-md border border-white/[0.06] bg-lab-panel2/50 p-4">
+      <p className="font-semibold text-lab-text">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-lab-muted">{subtitle}</p>
+      <div className="mt-4 h-56">
+        {isEmpty ? (
+          <div className="flex h-full items-center justify-center rounded-md border border-white/[0.06] bg-black/20 px-4 text-center text-sm text-lab-muted">
+            {emptyText}
+          </div>
+        ) : (
+          children
+        )}
+      </div>
+    </article>
+  );
+}
+
+function TelemetryLineChart({
+  title,
+  subtitle,
+  data,
+  dataKey,
+  emptyText,
+}: {
+  title: string;
+  subtitle: string;
+  data: Array<Record<string, number>>;
+  dataKey: string;
+  emptyText: string;
+}) {
+  return (
+    <TelemetryChartFrame title={title} subtitle={subtitle} isEmpty={data.length === 0} emptyText={emptyText}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ top: 10, right: 16, left: -12, bottom: 0 }}>
+          <CartesianGrid stroke="#202A38" strokeDasharray="3 3" />
+          <XAxis dataKey="minute" {...chartAxisStyle} tickFormatter={(value: number) => `${value}m`} />
+          <YAxis {...chartAxisStyle} />
+          <Tooltip contentStyle={chartTooltipStyle} labelFormatter={(value) => `${value} minutes`} />
+          <Line type="monotone" dataKey={dataKey} stroke="#45D4FF" strokeWidth={3} dot={{ r: 3 }} />
+        </LineChart>
+      </ResponsiveContainer>
+    </TelemetryChartFrame>
+  );
+}
+
+function TelemetryBarChart({
+  title,
+  subtitle,
+  data,
+  dataKey,
+  emptyText,
+  color,
+}: {
+  title: string;
+  subtitle: string;
+  data: Array<{ label: string; [key: string]: string | number }>;
+  dataKey: string;
+  emptyText: string;
+  color: string;
+}) {
+  return (
+    <TelemetryChartFrame title={title} subtitle={subtitle} isEmpty={data.length === 0} emptyText={emptyText}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} layout="vertical" margin={{ top: 0, right: 16, left: 20, bottom: 0 }}>
+          <CartesianGrid stroke="#202A38" strokeDasharray="3 3" horizontal={false} />
+          <XAxis type="number" {...chartAxisStyle} />
+          <YAxis type="category" dataKey="label" width={120} {...chartAxisStyle} />
+          <Tooltip contentStyle={chartTooltipStyle} />
+          <Bar dataKey={dataKey} fill={color} radius={[0, 5, 5, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </TelemetryChartFrame>
+  );
+}
+
 function DetectedWindowList({ report }: { report: PreliminaryRiftLabReport }) {
   const windows = [
     ...report.signals.deathBeforeObjective.map((signal) => ({
       title: "Death before objective",
-      detail: `${signal.deathTimestamp} death preceded ${signal.objectiveType} at ${signal.objectiveTimestamp} by ${signal.secondsBeforeObjective}s. Killer team: ${signal.killerTeam}.`,
+      detail: `${signal.deathTimestamp} death preceded ${signal.objectiveWindowLabel} by ${signal.secondsBeforeObjective}s. Killer team: ${signal.killerTeam}.`,
       severity: signal.severity,
     })),
     ...report.signals.deathAfterObjective.map((signal) => ({
       title: "Post-objective tempo loss",
-      detail: `${signal.objectiveType} at ${signal.objectiveTimestamp}, death ${signal.secondsAfterObjective}s later at ${signal.deathTimestamp}.`,
+      detail: `${signal.objectiveWindowLabel}, death ${signal.secondsAfterObjective}s later at ${signal.deathTimestamp}.`,
       severity: signal.severity,
     })),
     ...report.signals.structureLossAfterDeath.map((signal) => ({
       title: "Structure loss after death",
-      detail: `${signal.towerType ?? "Structure"} on ${signal.lane ?? "unknown lane"} fell ${signal.secondsAfterDeath}s after death at ${signal.deathTimestamp}.`,
+      detail: getStructureLossWindowDetail(signal),
       severity: signal.severity,
     })),
   ];
@@ -530,6 +821,27 @@ function DetectedWindowList({ report }: { report: PreliminaryRiftLabReport }) {
       </div>
     </div>
   );
+}
+
+function getStructureLossWindowDetail(
+  signal: PreliminaryRiftLabReport["signals"]["structureLossAfterDeath"][number],
+): string {
+  const structure = formatStructureForUser(signal.lane, signal.towerType ?? signal.buildingType);
+  const baseDetail = `Your death at ${signal.deathTimestamp} was followed by an allied ${structure} falling ${signal.secondsAfterDeath}s later.`;
+
+  if (signal.laneRelevance === "low") {
+    return `${baseDetail} ${signal.relevanceExplanation}`;
+  }
+
+  if (signal.laneRelevance === "high") {
+    return `${baseDetail} High relevance structure-loss window; causal confidence ${signal.causalConfidence}.`;
+  }
+
+  if (signal.laneRelevance === "medium") {
+    return `${baseDetail} May have contributed to a medium relevance structure-loss association; causal confidence ${signal.causalConfidence}.`;
+  }
+
+  return `${baseDetail} Low-confidence structure-loss association; causal confidence ${signal.causalConfidence}.`;
 }
 
 function TimelineDiagnosticsPanel({ diagnostics }: { diagnostics: TimelineDiagnostics }) {
@@ -578,13 +890,10 @@ function TimelineDiagnosticsPanel({ diagnostics }: { diagnostics: TimelineDiagno
           {diagnostics.buildingEvents.map((event, index) => (
             <DiagnosticRow key={`${event.timestamp}-${event.buildingType}-${index}`}>
               <span>{event.timestamp}</span>
-              <span>
-                {event.buildingType}
-                {event.towerType ? ` (${event.towerType})` : ""}
-              </span>
+              <span>{formatStructureForUser(event.laneType, event.towerType ?? event.buildingType)}</span>
               <span>
                 Team affected: {event.teamAffected}
-                {event.laneType ? ` - ${event.laneType}` : ""}
+                {event.laneType ? ` - ${formatLaneForUser(event.laneType)}` : ""}
               </span>
             </DiagnosticRow>
           ))}

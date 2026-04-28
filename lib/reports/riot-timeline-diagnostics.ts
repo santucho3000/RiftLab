@@ -4,6 +4,7 @@ export type TimelineDiagnostics = {
   matchId: string;
   participantId: number;
   playerDeaths: PlayerDeathEvent[];
+  championKillEvents: ChampionKillEvent[];
   eliteMonsterEvents: EliteMonsterEvent[];
   buildingEvents: BuildingEvent[];
   frameSnapshots: PlayerFrameSnapshot[];
@@ -15,6 +16,15 @@ export type PlayerDeathEvent = {
   timestamp: string;
   killerParticipantId: number | null;
   assistingParticipantIds: number[];
+};
+
+export type ChampionKillEvent = {
+  timestamp: string;
+  killerParticipantId: number | null;
+  victimParticipantId: number | null;
+  assistingParticipantIds: number[];
+  killerTeam: "Blue" | "Red" | "Unknown";
+  victimTeam: "Blue" | "Red" | "Unknown";
 };
 
 export type EliteMonsterEvent = {
@@ -60,6 +70,16 @@ export function buildTimelineDiagnostics(
       timestamp: formatTimestamp(event.timestamp),
       killerParticipantId: event.killerId ?? null,
       assistingParticipantIds: event.assistingParticipantIds ?? [],
+    }));
+  const championKillEvents = events
+    .filter((event) => event.type === "CHAMPION_KILL")
+    .map((event) => ({
+      timestamp: formatTimestamp(event.timestamp),
+      killerParticipantId: event.killerId ?? null,
+      victimParticipantId: event.victimId ?? null,
+      assistingParticipantIds: event.assistingParticipantIds ?? [],
+      killerTeam: getParticipantTeamSide(event.killerId),
+      victimTeam: getParticipantTeamSide(event.victimId),
     }));
   const eliteMonsterEvents = events
     .filter((event) => event.type === "ELITE_MONSTER_KILL")
@@ -110,6 +130,7 @@ export function buildTimelineDiagnostics(
     matchId: timeline.metadata.matchId,
     participantId,
     playerDeaths,
+    championKillEvents,
     eliteMonsterEvents,
     buildingEvents,
     frameSnapshots,
@@ -120,6 +141,7 @@ export function buildTimelineDiagnostics(
 
 function normalizeMonsterType(event: RiotTimelineEventDto): string {
   if (event.monsterSubType === "ELDER_DRAGON") return "Elder Dragon";
+  if (event.monsterType === "HORDE") return "Voidgrubs/Horde";
   if (event.monsterType === "DRAGON") return "Dragon";
   if (event.monsterType === "RIFTHERALD") return "Rift Herald";
   if (event.monsterType === "BARON_NASHOR") return "Baron";
@@ -129,6 +151,13 @@ function normalizeMonsterType(event: RiotTimelineEventDto): string {
 function getTeamSide(teamId: number | undefined): "Blue" | "Red" | "Unknown" {
   if (teamId === 100) return "Blue";
   if (teamId === 200) return "Red";
+  return "Unknown";
+}
+
+function getParticipantTeamSide(participantId: number | undefined): "Blue" | "Red" | "Unknown" {
+  if (participantId === undefined || participantId <= 0) return "Unknown";
+  if (participantId <= 5) return "Blue";
+  if (participantId <= 10) return "Red";
   return "Unknown";
 }
 

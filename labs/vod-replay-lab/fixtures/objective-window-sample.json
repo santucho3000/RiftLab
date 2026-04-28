@@ -1,0 +1,154 @@
+{
+  "schemaVersion": "vod-replay-lab.objective-window.v0.1",
+  "description": "Manual research fixture only. Simulates one Dragon objective window and is not real VOD output.",
+  "objectiveWindow": {
+    "id": "lab-window-dragon-001",
+    "matchId": "LAB_0000000001",
+    "windowStartSeconds": 660,
+    "windowEndSeconds": 750,
+    "objective": {
+      "type": "Dragon",
+      "spawnOrKillTimeSeconds": 739,
+      "controllingSide": "Red"
+    },
+    "relatedPlayerDeath": {
+      "participantId": 4,
+      "timeSeconds": 681,
+      "teamSide": "Blue"
+    },
+    "notes": "API-only chain: Blue ADC death at 11:21 preceded Red Dragon at 12:19."
+  },
+  "participants": [
+    {
+      "participantId": 2,
+      "teamSide": "Blue",
+      "championName": "Sejuani",
+      "role": "Jungle"
+    },
+    {
+      "participantId": 4,
+      "teamSide": "Blue",
+      "championName": "Tristana",
+      "role": "ADC"
+    },
+    {
+      "participantId": 5,
+      "teamSide": "Blue",
+      "championName": "Nautilus",
+      "role": "Support"
+    },
+    {
+      "participantId": 7,
+      "teamSide": "Red",
+      "championName": "Lee Sin",
+      "role": "Jungle"
+    },
+    {
+      "participantId": 9,
+      "teamSide": "Red",
+      "championName": "Jinx",
+      "role": "ADC"
+    }
+  ],
+  "championPositionSamples": [
+    {
+      "participantId": 4,
+      "championName": "Tristana",
+      "teamSide": "Blue",
+      "timeSeconds": 666,
+      "x": 0.58,
+      "y": 0.32,
+      "region": "bot_river",
+      "confidence": 0.86
+    },
+    {
+      "participantId": 4,
+      "championName": "Tristana",
+      "teamSide": "Blue",
+      "timeSeconds": 680,
+      "x": 0.61,
+      "y": 0.35,
+      "region": "bot_river",
+      "confidence": 0.82
+    },
+    {
+      "participantId": 2,
+      "championName": "Sejuani",
+      "teamSide": "Blue",
+      "timeSeconds": 680,
+      "x": 0.43,
+      "y": 0.42,
+      "region": "blue_jungle",
+      "confidence": 0.8
+    },
+    {
+      "participantId": 7,
+      "championName": "Lee Sin",
+      "teamSide": "Red",
+      "timeSeconds": 680,
+      "x": 0.64,
+      "y": 0.38,
+      "region": "dragon_pit",
+      "confidence": 0.84
+    },
+    {
+      "participantId": 9,
+      "championName": "Jinx",
+      "teamSide": "Red",
+      "timeSeconds": 680,
+      "x": 0.66,
+      "y": 0.33,
+      "region": "bot_river",
+      "confidence": 0.81
+    }
+  ],
+  "alliedPresence": {
+    "windowStartSeconds": 660,
+    "windowEndSeconds": 705,
+    "bluePresentParticipantIds": [4],
+    "redPresentParticipantIds": [7, 9],
+    "summary": "Blue ADC appears near bot river without nearby allied cluster before death."
+  },
+  "enemyPresence": {
+    "windowStartSeconds": 660,
+    "windowEndSeconds": 705,
+    "redPresentParticipantIds": [7, 9],
+    "summary": "Red jungle and ADC occupy river entrance before the Dragon take."
+  },
+  "isolationSignal": {
+    "participantId": 4,
+    "timeSeconds": 680,
+    "nearestAllyDistance": 0.21,
+    "alliesWithinObjectiveRadius": 0,
+    "enemiesWithinObjectiveRadius": 2,
+    "isIsolated": true,
+    "confidence": 0.72,
+    "interpretation": "The player appears isolated near the Dragon approach before dying. This would raise causal confidence for objective-window value lost if validated against real VOD."
+  },
+  "zoneControlSignal": {
+    "region": "bot_river",
+    "windowStartSeconds": 660,
+    "windowEndSeconds": 739,
+    "controllingSide": "Red",
+    "blueOccupancySeconds": 19,
+    "redOccupancySeconds": 54,
+    "confidence": 0.69,
+    "interpretation": "Red side controls bot river longer before Dragon, suggesting first access to the objective zone."
+  },
+  "rotationSignal": {
+    "participantId": 2,
+    "fromRegion": "blue_jungle",
+    "toRegion": "bot_river",
+    "startTimeSeconds": 670,
+    "endTimeSeconds": 724,
+    "rotationType": "late_rotation",
+    "arrivedBeforeOpponentSeconds": -18,
+    "confidence": 0.63,
+    "interpretation": "Blue jungle arrives after Red has already occupied river, suggesting late objective setup."
+  },
+  "expectedResearchInterpretation": {
+    "apiOnly": "Death before enemy Dragon equals medium-confidence objective-window cost.",
+    "vodEnriched": "If real VOD confirms this pattern, the chain becomes isolated death plus enemy first river control before Dragon.",
+    "scoringImpactLater": "Could increase Value Lost confidence and reduce Objective Contribution only after validated VOD evidence exists."
+  }
+}

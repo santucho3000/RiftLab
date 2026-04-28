@@ -58,6 +58,7 @@ export type PlayerFrameSnapshot = {
   minute: number;
   currentGold: number;
   totalGold: number;
+  xp: number | null;
   level: number;
   minionsKilled: number;
   jungleMinionsKilled: number;
@@ -140,6 +141,7 @@ export function buildTimelineDiagnostics(
         minute: Math.round(frame.timestamp / 60000),
         currentGold: participantFrame.currentGold,
         totalGold: participantFrame.totalGold,
+        xp: participantFrame.xp ?? null,
         level: participantFrame.level,
         minionsKilled: participantFrame.minionsKilled,
         jungleMinionsKilled: participantFrame.jungleMinionsKilled,
@@ -160,6 +162,7 @@ export function buildTimelineDiagnostics(
         minute,
         currentGold: participantFrame.currentGold,
         totalGold: participantFrame.totalGold,
+        xp: participantFrame.xp ?? null,
         level: participantFrame.level,
         minionsKilled: participantFrame.minionsKilled,
         jungleMinionsKilled: participantFrame.jungleMinionsKilled,

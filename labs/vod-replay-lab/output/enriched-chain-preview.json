@@ -1,0 +1,86 @@
+[
+  {
+    "fixtureName": "isolated-death-before-dragon.json",
+    "apiOnlyChain": {
+      "title": "Death before enemy Dragon",
+      "classification": "negative",
+      "valueDirection": "lost",
+      "evidenceConfidence": "high",
+      "causalConfidence": "medium",
+      "explanation": "Riot API confirms the player death occurred before an enemy Dragon window, but API alone cannot confirm positioning, vision, isolation, or contest intent."
+    },
+    "vodEnhancedChain": {
+      "title": "Isolated death before enemy Dragon control",
+      "classification": "negative",
+      "valueDirection": "lost",
+      "evidenceConfidence": "medium/high",
+      "causalConfidence": "medium/high",
+      "explanation": "Spatial fixture suggests isolated objective-window value loss: Blue ADC (Tristana) was isolated while Red controlled bot river dragon entrance and had stronger Dragon presence. This would support upgrading the API-only chain from timing association to stronger objective-window value loss if real VOD evidence validated it.",
+      "supportingSignals": [
+        "Isolated participant: Blue ADC (Tristana) at 11:21",
+        "Objective presence: Red advantage (1 Blue vs 2 Red)",
+        "Zone control: Red controlled bot river dragon entrance"
+      ]
+    },
+    "confidenceChange": "causal confidence medium -> medium/high",
+    "classificationChange": "classification remains negative; reason becomes isolated objective-window value loss",
+    "scoringImpactRecommendation": "Increase death/objective value-loss confidence if real evidence validates isolation, enemy zone control, and enemy objective presence."
+  },
+  {
+    "fixtureName": "late-rotation-to-herald.json",
+    "apiOnlyChain": {
+      "title": "Poor Herald contest / objective loss",
+      "classification": "negative",
+      "valueDirection": "lost",
+      "evidenceConfidence": "high",
+      "causalConfidence": "low/medium",
+      "explanation": "Riot API confirms objective outcome and timing, but API alone cannot explain setup quality, first move, or rotation timing."
+    },
+    "vodEnhancedChain": {
+      "title": "Late rotation and enemy first control before Herald",
+      "classification": "negative",
+      "valueDirection": "lost",
+      "evidenceConfidence": "medium/high",
+      "causalConfidence": "medium",
+      "explanation": "Spatial fixture suggests tempo/setup issue: Red controlled top river herald entrance after Red Mid (Orianna) moved first, while Blue Mid (Zoe) rotated late into top river. The classification remains negative, but the causal reason shifts from generic objective loss to tempo, first-move, and setup quality.",
+      "supportingSignals": [
+        "Objective presence: Red advantage (2 Blue vs 3 Red)",
+        "Zone control: Red controlled top river herald entrance",
+        "First move: Red Mid (Orianna) reached top river first",
+        "Late rotation: Blue Mid (Zoe) arrived 21s after opponent timing",
+        "Fight setup: Blue staggered_river_entry; Red grouped_top_river_control"
+      ]
+    },
+    "confidenceChange": "causal confidence low/medium -> medium",
+    "classificationChange": "classification remains negative; reason changes to tempo/setup issue",
+    "scoringImpactRecommendation": "Classify as rotation/setup issue, not simply objective lost. Keep confidence capped until real VOD confirms first move, zone control, and staggered entry."
+  },
+  {
+    "fixtureName": "useful-death-before-allied-dragon.json",
+    "apiOnlyChain": {
+      "title": "Death before allied Dragon",
+      "classification": "neutral / small tempo cost",
+      "valueDirection": "neutral or trade",
+      "evidenceConfidence": "high",
+      "causalConfidence": "low/medium",
+      "explanation": "Riot API confirms the player died before an allied Dragon, so this should not be counted as objective loss. API alone cannot determine whether the death was useful."
+    },
+    "vodEnhancedChain": {
+      "title": "Possible enabling trade before allied Dragon",
+      "classification": "possible positive trade",
+      "valueDirection": "possible gain",
+      "evidenceConfidence": "medium/high",
+      "causalConfidence": "medium",
+      "explanation": "Spatial fixture suggests possible enabling trade: Blue Support (Thresh) died or fought forward while Blue controlled dragon pit and Red Jungle (Vi) was displaced away from the objective. This remains medium confidence because useful-death classification still needs fight context and intent cannot be proven from minimap evidence alone.",
+      "supportingSignals": [
+        "Objective presence: Blue advantage (3 Blue vs 2 Red)",
+        "Zone control: Blue controlled dragon pit",
+        "Enemy displacement proxy: Red Jungle (Vi) isolated away from the pit",
+        "Fight setup: Blue Support (Thresh) shown as frontline"
+      ]
+    },
+    "confidenceChange": "causal confidence low/medium -> medium",
+    "classificationChange": "neutral / small tempo cost -> possible positive trade",
+    "scoringImpactRecommendation": "Do not penalize as pure death. Consider enabling-trade evidence only if real VOD validates allied objective control and enemy jungler displacement."
+  }
+]

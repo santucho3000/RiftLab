@@ -953,14 +953,54 @@ function getRivalRoleScoreDelta(summary: RiotMatchSummary): number {
   const goldDelta = player.goldEarned - opponent.goldEarned;
   const csDelta = player.totalCs - opponent.totalCs;
   const visionDelta = player.visionScore - opponent.visionScore;
+  const damageDelta = nullableDelta(player.totalDamageDealtToChampions, opponent.totalDamageDealtToChampions) ?? 0;
+  const wardsPlacedDelta = nullableDelta(player.wardsPlaced, opponent.wardsPlaced) ?? 0;
+  const wardsKilledDelta = nullableDelta(player.wardsKilled, opponent.wardsKilled) ?? 0;
   const kdaDelta = (player.kills + player.assists) / Math.max(player.deaths, 1) -
     (opponent.kills + opponent.assists) / Math.max(opponent.deaths, 1);
 
   if (supportRole) {
-    return clampDelta(Math.round(visionDelta / 8) + Math.round(kdaDelta * 2), -6, 6);
+    const delta = clampDelta(
+      Math.round(visionDelta / 8) +
+        Math.round(kdaDelta * 2) +
+        Math.round((wardsPlacedDelta + wardsKilledDelta * 2) / 5),
+      -6,
+      6,
+    );
+
+    console.info("[RiftLab scoring v0.1] rival role direct value adjustment:", {
+      supportRole,
+      csPenaltySkipped: true,
+      visionDelta,
+      wardsPlacedDelta,
+      wardsKilledDelta,
+      kdaDelta,
+      finalAdjustment: delta,
+    });
+
+    return delta;
   }
 
-  return clampDelta(Math.round(goldDelta / 600) + Math.round(csDelta / 20) + Math.round(kdaDelta * 2), -8, 8);
+  const delta = clampDelta(
+    Math.round(goldDelta / 600) +
+      Math.round(csDelta / 20) +
+      Math.round(kdaDelta * 2) +
+      Math.round(damageDelta / 3000),
+    -8,
+    8,
+  );
+
+  console.info("[RiftLab scoring v0.1] rival role direct value adjustment:", {
+    supportRole,
+    csPenaltySkipped: false,
+    goldDelta,
+    csDelta,
+    damageDelta,
+    kdaDelta,
+    finalAdjustment: delta,
+  });
+
+  return delta;
 }
 
 function normalizeRoleForComparison(role: string): string {
@@ -974,6 +1014,10 @@ function normalizeRoleForComparison(role: string): string {
 
 function clampDelta(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+function nullableDelta(left: number | null, right: number | null): number | null {
+  return left === null || right === null ? null : left - right;
 }
 
 function scoreCs(csPerMinute: number, position: string): number {

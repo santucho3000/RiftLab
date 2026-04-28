@@ -1,0 +1,299 @@
+{
+  "schemaVersion": "vod-evidence.v0.1",
+  "source": {
+    "type": "manual_annotation",
+    "toolName": "riftlab-vod-replay-lab",
+    "toolVersion": "0.1.0",
+    "modelVersion": "none",
+    "inputKind": "annotation",
+    "inputHash": "sha256:lab-isolated-death-before-dragon",
+    "createdAt": "2026-04-28T00:00:00.000Z"
+  },
+  "match": {
+    "matchId": "LAB_DRAGON_ISOLATION_001",
+    "gameVersion": "15.8.1",
+    "region": "LAS",
+    "durationSeconds": 1840,
+    "timeAlignment": {
+      "method": "manual",
+      "videoStartOffsetMs": 0,
+      "confidence": 0.9
+    }
+  },
+  "coordinateSystem": {
+    "type": "summoners_rift_normalized",
+    "xRange": [0, 1],
+    "yRange": [0, 1],
+    "origin": "blue_bottom_left",
+    "notes": "Manual lab coordinates. Not real VOD output."
+  },
+  "participants": [
+    {
+      "participantId": 2,
+      "teamSide": "Blue",
+      "championName": "LeeSin",
+      "riotPuuid": null,
+      "detectorLabel": "blue_jungle_leesin"
+    },
+    {
+      "participantId": 3,
+      "teamSide": "Blue",
+      "championName": "Zoe",
+      "riotPuuid": null,
+      "detectorLabel": "blue_mid_zoe"
+    },
+    {
+      "participantId": 4,
+      "teamSide": "Blue",
+      "championName": "Tristana",
+      "riotPuuid": null,
+      "detectorLabel": "blue_adc_tristana"
+    },
+    {
+      "participantId": 7,
+      "teamSide": "Red",
+      "championName": "Vi",
+      "riotPuuid": null,
+      "detectorLabel": "red_jungle_vi"
+    },
+    {
+      "participantId": 10,
+      "teamSide": "Red",
+      "championName": "Nautilus",
+      "riotPuuid": null,
+      "detectorLabel": "red_support_nautilus"
+    }
+  ],
+  "championTracks": [
+    {
+      "participantId": 4,
+      "championName": "Tristana",
+      "samples": [
+        {
+          "t": 660,
+          "x": 0.57,
+          "y": 0.31,
+          "confidence": 0.86,
+          "visibility": "visible",
+          "sourceFrame": 19800
+        },
+        {
+          "t": 674,
+          "x": 0.6,
+          "y": 0.34,
+          "confidence": 0.84,
+          "visibility": "visible",
+          "sourceFrame": 20220
+        },
+        {
+          "t": 681,
+          "x": 0.62,
+          "y": 0.36,
+          "confidence": 0.8,
+          "visibility": "visible",
+          "sourceFrame": 20430
+        }
+      ],
+      "trackConfidence": 0.83,
+      "gaps": []
+    },
+    {
+      "participantId": 2,
+      "championName": "LeeSin",
+      "samples": [
+        {
+          "t": 660,
+          "x": 0.42,
+          "y": 0.43,
+          "confidence": 0.82,
+          "visibility": "visible",
+          "sourceFrame": 19800
+        },
+        {
+          "t": 681,
+          "x": 0.44,
+          "y": 0.41,
+          "confidence": 0.79,
+          "visibility": "visible",
+          "sourceFrame": 20430
+        }
+      ],
+      "trackConfidence": 0.8,
+      "gaps": []
+    },
+    {
+      "participantId": 7,
+      "championName": "Vi",
+      "samples": [
+        {
+          "t": 660,
+          "x": 0.65,
+          "y": 0.39,
+          "confidence": 0.85,
+          "visibility": "visible",
+          "sourceFrame": 19800
+        },
+        {
+          "t": 681,
+          "x": 0.63,
+          "y": 0.36,
+          "confidence": 0.83,
+          "visibility": "visible",
+          "sourceFrame": 20430
+        }
+      ],
+      "trackConfidence": 0.84,
+      "gaps": []
+    },
+    {
+      "participantId": 10,
+      "championName": "Nautilus",
+      "samples": [
+        {
+          "t": 660,
+          "x": 0.66,
+          "y": 0.32,
+          "confidence": 0.83,
+          "visibility": "visible",
+          "sourceFrame": 19800
+        },
+        {
+          "t": 681,
+          "x": 0.64,
+          "y": 0.35,
+          "confidence": 0.81,
+          "visibility": "visible",
+          "sourceFrame": 20430
+        }
+      ],
+      "trackConfidence": 0.82,
+      "gaps": []
+    }
+  ],
+  "wardSamples": [
+    {
+      "t": 668,
+      "teamSide": "Red",
+      "wardType": "control",
+      "x": 0.61,
+      "y": 0.39,
+      "confidence": 0.72,
+      "status": "detected"
+    }
+  ],
+  "objectivePresenceSignals": [
+    {
+      "objectiveType": "Dragon",
+      "windowStart": 649,
+      "windowEnd": 784,
+      "bluePresentParticipantIds": [4],
+      "redPresentParticipantIds": [7, 10],
+      "blueArrivalOrder": [4],
+      "redArrivalOrder": [10, 7],
+      "controllingSide": "Red",
+      "confidence": 0.76
+    }
+  ],
+  "rotationSignals": [
+    {
+      "id": "iso-dragon-blue-jungle-late-hover",
+      "participantId": 2,
+      "startTime": 650,
+      "endTime": 716,
+      "fromRegion": "blue_jungle",
+      "toRegion": "bot_river",
+      "rotationType": "late_rotation",
+      "arrivedBeforeOpponentSeconds": -24,
+      "confidence": 0.64
+    }
+  ],
+  "teamSpacingSignals": [
+    {
+      "id": "iso-dragon-blue-adc-isolated",
+      "time": 681,
+      "teamSide": "Blue",
+      "context": "pre_objective",
+      "averageDistance": 0.24,
+      "isolatedParticipantIds": [4],
+      "clusterParticipantIds": [2, 3],
+      "confidence": 0.73
+    }
+  ],
+  "zoneControlSignals": [
+    {
+      "id": "iso-dragon-red-river-control",
+      "windowStart": 649,
+      "windowEnd": 739,
+      "region": "bot_river_dragon_entrance",
+      "controllingSide": "Red",
+      "blueOccupancySeconds": 18,
+      "redOccupancySeconds": 67,
+      "wardCoverage": {
+        "blue": 0.18,
+        "red": 0.62
+      },
+      "confidence": 0.71
+    }
+  ],
+  "fightSetupSignals": [
+    {
+      "id": "iso-dragon-collapsed-pick",
+      "windowStart": 670,
+      "windowEnd": 686,
+      "fightEventIds": ["api-player-death-1121"],
+      "blueFormation": "single_carry_forward",
+      "redFormation": "river_collapse",
+      "playerContext": {
+        "participantId": 4,
+        "state": "isolated",
+        "distanceFromTeam": 0.22
+      },
+      "confidence": 0.66
+    }
+  ],
+  "waveStateSignals": [
+    {
+      "id": "iso-dragon-bot-wave-unknown",
+      "time": 681,
+      "lane": "Bot",
+      "state": "unknown",
+      "confidence": 0.28,
+      "notes": "Wave state is not reliable in this manual minimap-only fixture."
+    }
+  ],
+  "ocrSignals": [
+    {
+      "time": 681,
+      "field": "game_clock",
+      "value": "11:21",
+      "confidence": 0.96
+    },
+    {
+      "time": 739,
+      "field": "game_clock",
+      "value": "12:19",
+      "confidence": 0.96
+    }
+  ],
+  "quality": {
+    "overallConfidence": 0.72,
+    "minimapConfidence": 0.78,
+    "ocrConfidence": 0.96,
+    "frameSampleRate": 1,
+    "unsupportedReasons": [],
+    "warnings": [
+      "Manual lab fixture only; not generated by computer vision.",
+      "Should not affect production scoring."
+    ]
+  },
+  "labInterpretation": {
+    "expectedApiOnlyInterpretation": "Player death at 11:21 precedes enemy Dragon at 12:19, so API-only scoring treats this as a medium-confidence objective-window cost.",
+    "expectedVodEnhancedInterpretation": "Spatial evidence suggests the player was isolated near bot river while the enemy had stronger river presence and zone control. If real evidence matched this fixture, causal confidence could increase.",
+    "expectedMeasurementSignals": [
+      "IsolationAtDeath",
+      "EnemyObjectivePresence",
+      "EnemyZoneControl",
+      "LateAlliedSupport"
+    ]
+  }
+}

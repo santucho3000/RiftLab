@@ -21,10 +21,16 @@ export type RiotReportParticipant = {
   totalDamageDealtToChampions: number | null;
   damageDealtToObjectives: number | null;
   damageDealtToTurrets: number | null;
+  totalDamageTaken: number | null;
+  wardsPlaced: number | null;
+  wardsKilled: number | null;
+  itemIds: number[];
+  summonerSpellIds: number[];
 };
 
 export type RiotMatchSummary = {
   matchId: string;
+  gameVersion: string;
   playerParticipantId: number;
   playerTeamId: number;
   championName: string;
@@ -43,6 +49,8 @@ export type RiotMatchSummary = {
   teamKills: number;
   killParticipation: number | null;
   summonerLevel: number | null;
+  itemIds: number[];
+  summonerSpellIds: number[];
   teamSide: "Blue" | "Red" | "Unknown";
   participants: RiotReportParticipant[];
 };
@@ -70,6 +78,7 @@ export function summarizeParticipantMatch(match: RiotMatchDto, puuid: string): R
 
   return {
     matchId: match.metadata.matchId,
+    gameVersion: match.info.gameVersion,
     playerParticipantId: participants.find((entry) => entry.puuid === puuid)?.participantId ?? 0,
     playerTeamId: participant.teamId,
     championName: participant.championName,
@@ -88,6 +97,8 @@ export function summarizeParticipantMatch(match: RiotMatchDto, puuid: string): R
     teamKills,
     killParticipation,
     summonerLevel: participant.summonerLevel ?? null,
+    itemIds: getItemIds(participant),
+    summonerSpellIds: getSummonerSpellIds(participant),
     teamSide: getTeamSide(participant.teamId),
     participants,
   };
@@ -123,6 +134,11 @@ function normalizeReportParticipant(
     totalDamageDealtToChampions: participant.totalDamageDealtToChampions ?? null,
     damageDealtToObjectives: participant.damageDealtToObjectives ?? null,
     damageDealtToTurrets: participant.damageDealtToTurrets ?? null,
+    totalDamageTaken: participant.totalDamageTaken ?? null,
+    wardsPlaced: participant.wardsPlaced ?? null,
+    wardsKilled: participant.wardsKilled ?? null,
+    itemIds: getItemIds(participant),
+    summonerSpellIds: getSummonerSpellIds(participant),
   };
 }
 
@@ -134,6 +150,24 @@ function getTeamKills(match: RiotMatchDto, teamId: number): number {
 
 function getTotalCs(participant: RiotParticipantDto): number {
   return participant.totalMinionsKilled + participant.neutralMinionsKilled;
+}
+
+function getItemIds(participant: RiotParticipantDto): number[] {
+  return [
+    participant.item0,
+    participant.item1,
+    participant.item2,
+    participant.item3,
+    participant.item4,
+    participant.item5,
+    participant.item6,
+  ].filter((itemId): itemId is number => typeof itemId === "number" && itemId > 0);
+}
+
+function getSummonerSpellIds(participant: RiotParticipantDto): number[] {
+  return [participant.summoner1Id, participant.summoner2Id].filter(
+    (spellId): spellId is number => typeof spellId === "number" && spellId > 0,
+  );
 }
 
 function getTeamSide(teamId: number): "Blue" | "Red" | "Unknown" {

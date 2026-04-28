@@ -1,0 +1,209 @@
+[
+  {
+    "fixtureName": "isolated-death-before-dragon.json",
+    "isValid": true,
+    "validationErrors": [],
+    "validationWarnings": [],
+    "objectivePresenceMeasurements": [
+      {
+        "objectiveType": "Dragon",
+        "window": "10:49-13:04",
+        "bluePresentCount": 1,
+        "redPresentCount": 2,
+        "presenceAdvantage": "Red advantage",
+        "controllingSide": "Red",
+        "confidence": 0.76
+      }
+    ],
+    "isolationMeasurements": [
+      {
+        "teamSide": "Blue",
+        "isolatedParticipantLabels": [
+          "Blue ADC (Tristana)"
+        ],
+        "time": 681,
+        "averageDistance": 0.24,
+        "confidence": 0.73
+      }
+    ],
+    "zoneControlMeasurements": [
+      {
+        "region": "bot_river_dragon_entrance",
+        "controllingSide": "Red",
+        "blueOccupancySeconds": 18,
+        "redOccupancySeconds": 67,
+        "wardCoverage": {
+          "blue": 0.18,
+          "red": 0.62
+        },
+        "zoneControlAdvantage": "Red",
+        "confidence": 0.71
+      }
+    ],
+    "rotationMeasurements": [
+      {
+        "participantLabel": "Blue Jungle (LeeSin)",
+        "fromRegion": "blue_jungle",
+        "toRegion": "bot_river",
+        "rotationType": "late_rotation",
+        "arrivedBeforeOpponentSeconds": -24,
+        "classification": "late_rotation",
+        "confidence": 0.64
+      }
+    ],
+    "fightSetupMeasurements": [
+      {
+        "window": "11:10-11:26",
+        "blueFormation": "single_carry_forward",
+        "redFormation": "river_collapse",
+        "playerContextParticipantLabel": "Blue ADC (Tristana)",
+        "playerContextState": "isolated",
+        "distanceFromTeam": 0.22,
+        "confidence": 0.66
+      }
+    ],
+    "generatedInterpretation": "Spatial fixture suggests isolated objective-window value loss: Blue ADC (Tristana) was isolated while Red controlled bot river dragon entrance and had stronger Dragon presence.",
+    "expectedVodEnhancedInterpretation": "Spatial evidence suggests the player was isolated near bot river while the enemy had stronger river presence and zone control. If real evidence matched this fixture, causal confidence could increase."
+  },
+  {
+    "fixtureName": "late-rotation-to-herald.json",
+    "isValid": true,
+    "validationErrors": [],
+    "validationWarnings": [],
+    "objectivePresenceMeasurements": [
+      {
+        "objectiveType": "Rift Herald",
+        "window": "9:00-10:35",
+        "bluePresentCount": 2,
+        "redPresentCount": 3,
+        "presenceAdvantage": "Red advantage",
+        "controllingSide": "Red",
+        "confidence": 0.75
+      }
+    ],
+    "isolationMeasurements": [
+      {
+        "teamSide": "Blue",
+        "isolatedParticipantLabels": [
+          "Blue Jungle (LeeSin)"
+        ],
+        "time": 600,
+        "averageDistance": 0.2,
+        "confidence": 0.68
+      }
+    ],
+    "zoneControlMeasurements": [
+      {
+        "region": "top_river_herald_entrance",
+        "controllingSide": "Red",
+        "blueOccupancySeconds": 25,
+        "redOccupancySeconds": 61,
+        "wardCoverage": {
+          "blue": 0.24,
+          "red": 0.6
+        },
+        "zoneControlAdvantage": "Red",
+        "confidence": 0.73
+      }
+    ],
+    "rotationMeasurements": [
+      {
+        "participantLabel": "Blue Mid (Zoe)",
+        "fromRegion": "mid_lane",
+        "toRegion": "top_river",
+        "rotationType": "late_rotation",
+        "arrivedBeforeOpponentSeconds": -21,
+        "classification": "late_rotation",
+        "confidence": 0.72
+      },
+      {
+        "participantLabel": "Red Mid (Orianna)",
+        "fromRegion": "mid_lane",
+        "toRegion": "top_river",
+        "rotationType": "first_move",
+        "arrivedBeforeOpponentSeconds": 21,
+        "classification": "first_move",
+        "confidence": 0.7
+      }
+    ],
+    "fightSetupMeasurements": [
+      {
+        "window": "9:50-10:28",
+        "blueFormation": "staggered_river_entry",
+        "redFormation": "grouped_top_river_control",
+        "playerContextParticipantLabel": "Blue Mid (Zoe)",
+        "playerContextState": "late_arrival",
+        "distanceFromTeam": 0.18,
+        "confidence": 0.64
+      }
+    ],
+    "generatedInterpretation": "Spatial fixture suggests tempo/setup issue: Red controlled top river herald entrance after Red Mid (Orianna) moved first, while Blue Mid (Zoe) rotated late into top river.",
+    "expectedVodEnhancedInterpretation": "Spatial evidence suggests the enemy arrived first, controlled top river, and Blue entered late/staggered. If real evidence matched this fixture, the loss could be framed as a tempo and rotation issue."
+  },
+  {
+    "fixtureName": "useful-death-before-allied-dragon.json",
+    "isValid": true,
+    "validationErrors": [],
+    "validationWarnings": [],
+    "objectivePresenceMeasurements": [
+      {
+        "objectiveType": "Dragon",
+        "window": "11:15-12:45",
+        "bluePresentCount": 3,
+        "redPresentCount": 2,
+        "presenceAdvantage": "Blue advantage",
+        "controllingSide": "Blue",
+        "confidence": 0.74
+      }
+    ],
+    "isolationMeasurements": [
+      {
+        "teamSide": "Red",
+        "isolatedParticipantLabels": [
+          "Red Jungle (Vi)"
+        ],
+        "time": 727,
+        "averageDistance": 0.19,
+        "confidence": 0.61
+      }
+    ],
+    "zoneControlMeasurements": [
+      {
+        "region": "dragon_pit",
+        "controllingSide": "Blue",
+        "blueOccupancySeconds": 58,
+        "redOccupancySeconds": 22,
+        "wardCoverage": {
+          "blue": 0.57,
+          "red": 0.22
+        },
+        "zoneControlAdvantage": "Blue",
+        "confidence": 0.7
+      }
+    ],
+    "rotationMeasurements": [
+      {
+        "participantLabel": "Blue Support (Thresh)",
+        "fromRegion": "dragon_pit",
+        "toRegion": "red_jungle_entrance",
+        "rotationType": "collapse",
+        "arrivedBeforeOpponentSeconds": 6,
+        "classification": "first_move",
+        "confidence": 0.67
+      }
+    ],
+    "fightSetupMeasurements": [
+      {
+        "window": "11:52-12:11",
+        "blueFormation": "pit_group_with_support_zone",
+        "redFormation": "split_jungle_support_response",
+        "playerContextParticipantLabel": "Blue Support (Thresh)",
+        "playerContextState": "frontline",
+        "distanceFromTeam": 0.12,
+        "confidence": 0.62
+      }
+    ],
+    "generatedInterpretation": "Spatial fixture suggests possible enabling trade: Blue Support (Thresh) died or fought forward while Blue controlled dragon pit and Red Jungle (Vi) was displaced away from the objective.",
+    "expectedVodEnhancedInterpretation": "Spatial evidence suggests the support pulled enemy jungle/support away from the pit while allies held Dragon control. If real evidence matched this fixture, the death could be neutral or positive trade evidence rather than pure value lost."
+  }
+]

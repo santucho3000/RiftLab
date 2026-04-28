@@ -1,0 +1,342 @@
+{
+  "schemaVersion": "vod-evidence.v0.1",
+  "source": {
+    "type": "manual_annotation",
+    "toolName": "riftlab-vod-replay-lab",
+    "toolVersion": "0.1.0",
+    "modelVersion": "none",
+    "inputKind": "annotation",
+    "inputHash": "sha256:lab-useful-death-before-allied-dragon",
+    "createdAt": "2026-04-28T00:00:00.000Z"
+  },
+  "match": {
+    "matchId": "LAB_DRAGON_TRADE_001",
+    "gameVersion": "15.8.1",
+    "region": "LAS",
+    "durationSeconds": 1760,
+    "timeAlignment": {
+      "method": "manual",
+      "videoStartOffsetMs": 0,
+      "confidence": 0.91
+    }
+  },
+  "coordinateSystem": {
+    "type": "summoners_rift_normalized",
+    "xRange": [0, 1],
+    "yRange": [0, 1],
+    "origin": "blue_bottom_left",
+    "notes": "Manual lab coordinates. Not real VOD output."
+  },
+  "participants": [
+    {
+      "participantId": 2,
+      "teamSide": "Blue",
+      "championName": "LeeSin",
+      "riotPuuid": null,
+      "detectorLabel": "blue_jungle_leesin"
+    },
+    {
+      "participantId": 3,
+      "teamSide": "Blue",
+      "championName": "Zoe",
+      "riotPuuid": null,
+      "detectorLabel": "blue_mid_zoe"
+    },
+    {
+      "participantId": 5,
+      "teamSide": "Blue",
+      "championName": "Thresh",
+      "riotPuuid": null,
+      "detectorLabel": "blue_support_thresh"
+    },
+    {
+      "participantId": 7,
+      "teamSide": "Red",
+      "championName": "Vi",
+      "riotPuuid": null,
+      "detectorLabel": "red_jungle_vi"
+    },
+    {
+      "participantId": 10,
+      "teamSide": "Red",
+      "championName": "Nautilus",
+      "riotPuuid": null,
+      "detectorLabel": "red_support_nautilus"
+    }
+  ],
+  "championTracks": [
+    {
+      "participantId": 5,
+      "championName": "Thresh",
+      "samples": [
+        {
+          "t": 705,
+          "x": 0.65,
+          "y": 0.4,
+          "confidence": 0.84,
+          "visibility": "visible",
+          "sourceFrame": 21150
+        },
+        {
+          "t": 719,
+          "x": 0.68,
+          "y": 0.43,
+          "confidence": 0.8,
+          "visibility": "visible",
+          "sourceFrame": 21570
+        },
+        {
+          "t": 727,
+          "x": 0.7,
+          "y": 0.44,
+          "confidence": 0.77,
+          "visibility": "visible",
+          "sourceFrame": 21810
+        }
+      ],
+      "trackConfidence": 0.8,
+      "gaps": []
+    },
+    {
+      "participantId": 2,
+      "championName": "LeeSin",
+      "samples": [
+        {
+          "t": 705,
+          "x": 0.58,
+          "y": 0.35,
+          "confidence": 0.86,
+          "visibility": "visible",
+          "sourceFrame": 21150
+        },
+        {
+          "t": 727,
+          "x": 0.6,
+          "y": 0.37,
+          "confidence": 0.84,
+          "visibility": "visible",
+          "sourceFrame": 21810
+        }
+      ],
+      "trackConfidence": 0.85,
+      "gaps": []
+    },
+    {
+      "participantId": 3,
+      "championName": "Zoe",
+      "samples": [
+        {
+          "t": 705,
+          "x": 0.54,
+          "y": 0.43,
+          "confidence": 0.82,
+          "visibility": "visible",
+          "sourceFrame": 21150
+        },
+        {
+          "t": 727,
+          "x": 0.57,
+          "y": 0.41,
+          "confidence": 0.81,
+          "visibility": "visible",
+          "sourceFrame": 21810
+        }
+      ],
+      "trackConfidence": 0.81,
+      "gaps": []
+    },
+    {
+      "participantId": 7,
+      "championName": "Vi",
+      "samples": [
+        {
+          "t": 705,
+          "x": 0.69,
+          "y": 0.43,
+          "confidence": 0.83,
+          "visibility": "visible",
+          "sourceFrame": 21150
+        },
+        {
+          "t": 727,
+          "x": 0.72,
+          "y": 0.47,
+          "confidence": 0.78,
+          "visibility": "visible",
+          "sourceFrame": 21810
+        }
+      ],
+      "trackConfidence": 0.8,
+      "gaps": []
+    },
+    {
+      "participantId": 10,
+      "championName": "Nautilus",
+      "samples": [
+        {
+          "t": 705,
+          "x": 0.68,
+          "y": 0.39,
+          "confidence": 0.82,
+          "visibility": "visible",
+          "sourceFrame": 21150
+        },
+        {
+          "t": 727,
+          "x": 0.71,
+          "y": 0.45,
+          "confidence": 0.79,
+          "visibility": "visible",
+          "sourceFrame": 21810
+        }
+      ],
+      "trackConfidence": 0.8,
+      "gaps": []
+    }
+  ],
+  "wardSamples": [
+    {
+      "t": 699,
+      "teamSide": "Blue",
+      "wardType": "control",
+      "x": 0.57,
+      "y": 0.39,
+      "confidence": 0.75,
+      "status": "detected"
+    },
+    {
+      "t": 714,
+      "teamSide": "Blue",
+      "wardType": "stealth",
+      "x": 0.62,
+      "y": 0.42,
+      "confidence": 0.68,
+      "status": "detected"
+    }
+  ],
+  "objectivePresenceSignals": [
+    {
+      "objectiveType": "Dragon",
+      "windowStart": 675,
+      "windowEnd": 765,
+      "bluePresentParticipantIds": [2, 3, 5],
+      "redPresentParticipantIds": [7, 10],
+      "blueArrivalOrder": [3, 2, 5],
+      "redArrivalOrder": [10, 7],
+      "controllingSide": "Blue",
+      "confidence": 0.74
+    }
+  ],
+  "rotationSignals": [
+    {
+      "id": "trade-dragon-support-zone",
+      "participantId": 5,
+      "startTime": 694,
+      "endTime": 727,
+      "fromRegion": "dragon_pit",
+      "toRegion": "red_jungle_entrance",
+      "rotationType": "collapse",
+      "arrivedBeforeOpponentSeconds": 6,
+      "confidence": 0.67
+    }
+  ],
+  "teamSpacingSignals": [
+    {
+      "id": "trade-dragon-blue-grouped",
+      "time": 719,
+      "teamSide": "Blue",
+      "context": "pre_objective",
+      "averageDistance": 0.1,
+      "isolatedParticipantIds": [],
+      "clusterParticipantIds": [2, 3, 5],
+      "confidence": 0.72
+    },
+    {
+      "id": "trade-dragon-red-jungle-pulled",
+      "time": 727,
+      "teamSide": "Red",
+      "context": "pre_objective",
+      "averageDistance": 0.19,
+      "isolatedParticipantIds": [7],
+      "clusterParticipantIds": [10],
+      "confidence": 0.61
+    }
+  ],
+  "zoneControlSignals": [
+    {
+      "id": "trade-dragon-blue-pit-control",
+      "windowStart": 675,
+      "windowEnd": 746,
+      "region": "dragon_pit",
+      "controllingSide": "Blue",
+      "blueOccupancySeconds": 58,
+      "redOccupancySeconds": 22,
+      "wardCoverage": {
+        "blue": 0.57,
+        "red": 0.22
+      },
+      "confidence": 0.7
+    }
+  ],
+  "fightSetupSignals": [
+    {
+      "id": "trade-dragon-support-sacrifice",
+      "windowStart": 712,
+      "windowEnd": 731,
+      "fightEventIds": ["api-player-death-1207", "api-blue-dragon-1226"],
+      "blueFormation": "pit_group_with_support_zone",
+      "redFormation": "split_jungle_support_response",
+      "playerContext": {
+        "participantId": 5,
+        "state": "frontline",
+        "distanceFromTeam": 0.12
+      },
+      "confidence": 0.62
+    }
+  ],
+  "waveStateSignals": [
+    {
+      "id": "trade-dragon-mid-wave-low-confidence",
+      "time": 720,
+      "lane": "Mid",
+      "state": "neutral",
+      "confidence": 0.32,
+      "notes": "Included only to demonstrate optional low-confidence wave context."
+    }
+  ],
+  "ocrSignals": [
+    {
+      "time": 727,
+      "field": "game_clock",
+      "value": "12:07",
+      "confidence": 0.95
+    },
+    {
+      "time": 746,
+      "field": "game_clock",
+      "value": "12:26",
+      "confidence": 0.95
+    }
+  ],
+  "quality": {
+    "overallConfidence": 0.7,
+    "minimapConfidence": 0.76,
+    "ocrConfidence": 0.95,
+    "frameSampleRate": 1,
+    "unsupportedReasons": [],
+    "warnings": [
+      "Manual lab fixture only; not generated by computer vision.",
+      "Useful death interpretation requires VOD/fight context before scoring use."
+    ]
+  },
+  "labInterpretation": {
+    "expectedApiOnlyInterpretation": "Player death before allied Dragon is a possible tempo cost in API-only timing.",
+    "expectedVodEnhancedInterpretation": "Spatial evidence suggests the support pulled enemy jungle/support away from the pit while allies held Dragon control. If real evidence matched this fixture, the death could be neutral or positive trade evidence rather than pure value lost.",
+    "expectedMeasurementSignals": [
+      "AlliedObjectivePresence",
+      "AlliedZoneControl",
+      "EnemyJunglerDisplacement",
+      "PossibleEnablingDeath"
+    ]
+  }
+}

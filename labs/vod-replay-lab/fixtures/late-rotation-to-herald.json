@@ -1,0 +1,351 @@
+{
+  "schemaVersion": "vod-evidence.v0.1",
+  "source": {
+    "type": "manual_annotation",
+    "toolName": "riftlab-vod-replay-lab",
+    "toolVersion": "0.1.0",
+    "modelVersion": "none",
+    "inputKind": "annotation",
+    "inputHash": "sha256:lab-late-rotation-to-herald",
+    "createdAt": "2026-04-28T00:00:00.000Z"
+  },
+  "match": {
+    "matchId": "LAB_HERALD_ROTATION_001",
+    "gameVersion": "15.8.1",
+    "region": "LAS",
+    "durationSeconds": 1905,
+    "timeAlignment": {
+      "method": "manual",
+      "videoStartOffsetMs": 0,
+      "confidence": 0.9
+    }
+  },
+  "coordinateSystem": {
+    "type": "summoners_rift_normalized",
+    "xRange": [0, 1],
+    "yRange": [0, 1],
+    "origin": "blue_bottom_left",
+    "notes": "Manual lab coordinates. Not real VOD output."
+  },
+  "participants": [
+    {
+      "participantId": 1,
+      "teamSide": "Blue",
+      "championName": "Gnar",
+      "riotPuuid": null,
+      "detectorLabel": "blue_top_gnar"
+    },
+    {
+      "participantId": 2,
+      "teamSide": "Blue",
+      "championName": "LeeSin",
+      "riotPuuid": null,
+      "detectorLabel": "blue_jungle_leesin"
+    },
+    {
+      "participantId": 3,
+      "teamSide": "Blue",
+      "championName": "Zoe",
+      "riotPuuid": null,
+      "detectorLabel": "blue_mid_zoe"
+    },
+    {
+      "participantId": 6,
+      "teamSide": "Red",
+      "championName": "Renekton",
+      "riotPuuid": null,
+      "detectorLabel": "red_top_renekton"
+    },
+    {
+      "participantId": 7,
+      "teamSide": "Red",
+      "championName": "Vi",
+      "riotPuuid": null,
+      "detectorLabel": "red_jungle_vi"
+    },
+    {
+      "participantId": 8,
+      "teamSide": "Red",
+      "championName": "Orianna",
+      "riotPuuid": null,
+      "detectorLabel": "red_mid_orianna"
+    }
+  ],
+  "championTracks": [
+    {
+      "participantId": 3,
+      "championName": "Zoe",
+      "samples": [
+        {
+          "t": 565,
+          "x": 0.49,
+          "y": 0.5,
+          "confidence": 0.86,
+          "visibility": "visible",
+          "sourceFrame": 16950
+        },
+        {
+          "t": 590,
+          "x": 0.5,
+          "y": 0.56,
+          "confidence": 0.83,
+          "visibility": "visible",
+          "sourceFrame": 17700
+        },
+        {
+          "t": 612,
+          "x": 0.52,
+          "y": 0.64,
+          "confidence": 0.8,
+          "visibility": "visible",
+          "sourceFrame": 18360
+        }
+      ],
+      "trackConfidence": 0.83,
+      "gaps": []
+    },
+    {
+      "participantId": 2,
+      "championName": "LeeSin",
+      "samples": [
+        {
+          "t": 565,
+          "x": 0.39,
+          "y": 0.61,
+          "confidence": 0.84,
+          "visibility": "visible",
+          "sourceFrame": 16950
+        },
+        {
+          "t": 612,
+          "x": 0.5,
+          "y": 0.68,
+          "confidence": 0.8,
+          "visibility": "visible",
+          "sourceFrame": 18360
+        }
+      ],
+      "trackConfidence": 0.82,
+      "gaps": []
+    },
+    {
+      "participantId": 7,
+      "championName": "Vi",
+      "samples": [
+        {
+          "t": 565,
+          "x": 0.57,
+          "y": 0.7,
+          "confidence": 0.86,
+          "visibility": "visible",
+          "sourceFrame": 16950
+        },
+        {
+          "t": 590,
+          "x": 0.55,
+          "y": 0.72,
+          "confidence": 0.84,
+          "visibility": "visible",
+          "sourceFrame": 17700
+        }
+      ],
+      "trackConfidence": 0.85,
+      "gaps": []
+    },
+    {
+      "participantId": 8,
+      "championName": "Orianna",
+      "samples": [
+        {
+          "t": 565,
+          "x": 0.53,
+          "y": 0.58,
+          "confidence": 0.84,
+          "visibility": "visible",
+          "sourceFrame": 16950
+        },
+        {
+          "t": 590,
+          "x": 0.55,
+          "y": 0.65,
+          "confidence": 0.82,
+          "visibility": "visible",
+          "sourceFrame": 17700
+        }
+      ],
+      "trackConfidence": 0.83,
+      "gaps": []
+    },
+    {
+      "participantId": 6,
+      "championName": "Renekton",
+      "samples": [
+        {
+          "t": 565,
+          "x": 0.56,
+          "y": 0.77,
+          "confidence": 0.82,
+          "visibility": "visible",
+          "sourceFrame": 16950
+        },
+        {
+          "t": 590,
+          "x": 0.55,
+          "y": 0.74,
+          "confidence": 0.8,
+          "visibility": "visible",
+          "sourceFrame": 17700
+        }
+      ],
+      "trackConfidence": 0.81,
+      "gaps": []
+    }
+  ],
+  "wardSamples": [
+    {
+      "t": 572,
+      "teamSide": "Red",
+      "wardType": "control",
+      "x": 0.52,
+      "y": 0.68,
+      "confidence": 0.72,
+      "status": "detected"
+    }
+  ],
+  "objectivePresenceSignals": [
+    {
+      "objectiveType": "Rift Herald",
+      "windowStart": 540,
+      "windowEnd": 635,
+      "bluePresentParticipantIds": [2, 3],
+      "redPresentParticipantIds": [6, 7, 8],
+      "blueArrivalOrder": [2, 3],
+      "redArrivalOrder": [7, 8, 6],
+      "controllingSide": "Red",
+      "confidence": 0.75
+    }
+  ],
+  "rotationSignals": [
+    {
+      "id": "herald-blue-mid-late",
+      "participantId": 3,
+      "startTime": 565,
+      "endTime": 612,
+      "fromRegion": "mid_lane",
+      "toRegion": "top_river",
+      "rotationType": "late_rotation",
+      "arrivedBeforeOpponentSeconds": -21,
+      "confidence": 0.72
+    },
+    {
+      "id": "herald-red-mid-first",
+      "participantId": 8,
+      "startTime": 548,
+      "endTime": 590,
+      "fromRegion": "mid_lane",
+      "toRegion": "top_river",
+      "rotationType": "first_move",
+      "arrivedBeforeOpponentSeconds": 21,
+      "confidence": 0.7
+    }
+  ],
+  "teamSpacingSignals": [
+    {
+      "id": "herald-blue-staggered-entry",
+      "time": 600,
+      "teamSide": "Blue",
+      "context": "pre_objective",
+      "averageDistance": 0.2,
+      "isolatedParticipantIds": [2],
+      "clusterParticipantIds": [1, 3],
+      "confidence": 0.68
+    },
+    {
+      "id": "herald-red-grouped-entry",
+      "time": 590,
+      "teamSide": "Red",
+      "context": "pre_objective",
+      "averageDistance": 0.09,
+      "isolatedParticipantIds": [],
+      "clusterParticipantIds": [6, 7, 8],
+      "confidence": 0.72
+    }
+  ],
+  "zoneControlSignals": [
+    {
+      "id": "herald-red-top-river-control",
+      "windowStart": 540,
+      "windowEnd": 620,
+      "region": "top_river_herald_entrance",
+      "controllingSide": "Red",
+      "blueOccupancySeconds": 25,
+      "redOccupancySeconds": 61,
+      "wardCoverage": {
+        "blue": 0.24,
+        "red": 0.6
+      },
+      "confidence": 0.73
+    }
+  ],
+  "fightSetupSignals": [
+    {
+      "id": "herald-poor-contest-setup",
+      "windowStart": 590,
+      "windowEnd": 628,
+      "fightEventIds": ["api-herald-contest-1018"],
+      "blueFormation": "staggered_river_entry",
+      "redFormation": "grouped_top_river_control",
+      "playerContext": {
+        "participantId": 3,
+        "state": "late_arrival",
+        "distanceFromTeam": 0.18
+      },
+      "confidence": 0.64
+    }
+  ],
+  "waveStateSignals": [
+    {
+      "id": "herald-mid-wave-priority-low-confidence",
+      "time": 570,
+      "lane": "Mid",
+      "state": "pushing_blue",
+      "confidence": 0.38,
+      "notes": "Represents possible red mid move timer; wave state requires validated lane detection."
+    }
+  ],
+  "ocrSignals": [
+    {
+      "time": 590,
+      "field": "game_clock",
+      "value": "09:50",
+      "confidence": 0.95
+    },
+    {
+      "time": 618,
+      "field": "game_clock",
+      "value": "10:18",
+      "confidence": 0.95
+    }
+  ],
+  "quality": {
+    "overallConfidence": 0.71,
+    "minimapConfidence": 0.77,
+    "ocrConfidence": 0.95,
+    "frameSampleRate": 1,
+    "unsupportedReasons": [],
+    "warnings": [
+      "Manual lab fixture only; not generated by computer vision.",
+      "Rotation interpretation should remain causal-confidence limited without full lane/wave context."
+    ]
+  },
+  "labInterpretation": {
+    "expectedApiOnlyInterpretation": "Rift Herald was lost or contested poorly, but API-only data cannot explain setup quality.",
+    "expectedVodEnhancedInterpretation": "Spatial evidence suggests the enemy arrived first, controlled top river, and Blue entered late/staggered. If real evidence matched this fixture, the loss could be framed as a tempo and rotation issue.",
+    "expectedMeasurementSignals": [
+      "EnemyFirstMove",
+      "EnemyZoneControl",
+      "LateRotation",
+      "StaggeredAlliedEntry"
+    ]
+  }
+}

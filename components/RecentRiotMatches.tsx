@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import {
@@ -20,11 +21,16 @@ import {
 import {
   formatLaneForUser,
   formatParticipantIdForUser,
-  formatParticipantIdsForUser,
   formatRoleForUser,
   formatStructureForUser,
 } from "@/lib/formatters/riot-display";
-import type { RiotMatchSummary, TimelineDiagnostics } from "@/lib/reports";
+import {
+  getChampionIconUrl,
+  getItemIconUrl,
+  getSummonerSpellIconUrl,
+  normalizeDataDragonVersion,
+} from "@/lib/datadragon";
+import type { RiotMatchSummary, RiotReportParticipant, TimelineDiagnostics } from "@/lib/reports";
 import { generatePreliminaryRiftLabReport } from "@/lib/scoring";
 import type { PreliminaryRiftLabReport } from "@/lib/scoring";
 
@@ -270,11 +276,13 @@ function RiotMatchSummaryCard({
   onLoadTimeline: () => void;
 }) {
   const [preliminaryReport, setPreliminaryReport] = useState<PreliminaryRiftLabReport | null>(null);
+  const dataDragonVersion = normalizeDataDragonVersion(summary.gameVersion);
   const stats = [
     ["Champion", summary.championName],
     ["Position", formatRoleForUser(summary.position)],
     ["Result", summary.result],
     ["Duration", summary.duration],
+    ["Patch assets", dataDragonVersion],
     ["KDA", `${summary.kills} / ${summary.deaths} / ${summary.assists}`],
     ["Total CS", summary.totalCs],
     ["CS/min", summary.csPerMinute],
@@ -297,12 +305,20 @@ function RiotMatchSummaryCard({
   return (
     <div className="mt-6 rounded-md border border-lab-cyan/15 bg-black/20 p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="eyebrow">Real match summary</p>
-          <h4 className="mt-2 text-2xl font-semibold text-lab-text">
-            {summary.championName} - {summary.result}
-          </h4>
-          <p className="mt-2 break-all text-sm text-lab-muted">Match ID: {summary.matchId}</p>
+        <div className="flex items-start gap-4">
+          <AssetIcon
+            src={getChampionIconUrl(summary.championName, summary.gameVersion)}
+            label={summary.championName}
+            size="lg"
+          />
+          <div>
+            <p className="eyebrow">Real match summary</p>
+            <h4 className="mt-2 text-2xl font-semibold text-lab-text">
+              {summary.championName} - {summary.result}
+            </h4>
+            <p className="mt-2 break-all text-sm text-lab-muted">Match ID: {summary.matchId}</p>
+            <p className="mt-1 text-sm text-lab-muted">Game version: {summary.gameVersion}</p>
+          </div>
         </div>
         <div className="flex flex-col gap-2 sm:items-end">
           <button
@@ -336,12 +352,36 @@ function RiotMatchSummaryCard({
           </div>
         ))}
       </div>
+      <div className="mt-5 grid gap-3 lg:grid-cols-2">
+        <AssetStrip title="Items" emptyText="No item data available.">
+          {summary.itemIds.map((itemId, index) => (
+            <AssetIcon
+              key={`${itemId}-${index}`}
+              src={getItemIconUrl(itemId, summary.gameVersion)}
+              label={`Item ${itemId}`}
+            />
+          ))}
+        </AssetStrip>
+        <AssetStrip title="Summoner spells" emptyText="No summoner spell data available.">
+          {summary.summonerSpellIds.map((spellId) => (
+            <AssetIcon
+              key={spellId}
+              src={getSummonerSpellIconUrl(spellId, summary.gameVersion)}
+              label={`Spell ${spellId}`}
+            />
+          ))}
+        </AssetStrip>
+      </div>
       <p className="mt-5 body-copy text-lab-muted">
         MVP notice: match details and timelines are real Riot API data when loaded. The preliminary
         report uses a simple rules-based v0.1 scorer and does not analyze VOD, wave intent, or comms.
       </p>
       {timeline.status === "loaded" ? (
-        <TimelineDiagnosticsPanel diagnostics={timeline.diagnostics} participants={summary.participants} />
+        <TimelineDiagnosticsPanel
+          diagnostics={timeline.diagnostics}
+          participants={summary.participants}
+          gameVersion={summary.gameVersion}
+        />
       ) : null}
       {preliminaryReport ? <PreliminaryReportPanel report={preliminaryReport} /> : null}
       {timeline.status === "error" ? (
@@ -427,6 +467,7 @@ function PreliminaryReportPanel({ report }: { report: PreliminaryRiftLabReport }
       </div>
 
       <RiftLabVerdictSection report={report} />
+      <RivalRoleDeltaSection report={report} />
       <DeepAnalysisSections report={report} />
       <CausalImpactChainsSection report={report} />
       <TelemetryChartsSection report={report} />
@@ -522,30 +563,131 @@ function RiftLabVerdictSection({ report }: { report: PreliminaryRiftLabReport })
   );
 }
 
+function RivalRoleDeltaSection({ report }: { report: PreliminaryRiftLabReport }) {
+  const roleDelta = report.deepAnalysis.rivalRoleDelta;
+  const finalDelta = roleDelta.finalDeltas;
+  const keyCheckpoints = roleDelta.checkpoints.filter((checkpoint) =>
+    [10, 15, 20].includes(checkpoint.minute),
+  );
+  const supportText = roleDelta.supportCsPenaltySkipped
+    ? "Support role detected: CS is displayed as neutral context and is not used as negative scoring evidence."
+    : "Role comparison includes economy, CS, level, damage, KDA, and vision from Riot API fields.";
+
+  if (!roleDelta.opponentAvailable || !roleDelta.player || !roleDelta.opponent) {
+    return (
+      <section className="mt-7 rounded-md border border-white/[0.07] bg-black/20 p-4">
+        <p className="label-muted">Rival Role Delta</p>
+        <h6 className="mt-2 text-lg font-semibold text-lab-text">Direct role opponent not available.</h6>
+        <p className="mt-3 text-sm leading-6 text-lab-muted">
+          RiftLab could not identify an exact role opponent from teamPosition or individualPosition.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="mt-7 rounded-md border border-lab-cyan/15 bg-black/20 p-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="label-muted">Rival Role Delta</p>
+          <h6 className="mt-2 text-xl font-semibold text-lab-text">
+            {roleDelta.roleLabel} comparison: {roleDelta.finalResult}
+          </h6>
+          <p className="mt-2 text-sm font-semibold text-lab-cyan">{roleDelta.profileSummary}</p>
+          <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-300">{roleDelta.explanation}</p>
+        </div>
+        <div className="flex flex-wrap gap-2 text-xs font-semibold">
+          <span className="rounded-md border border-lab-green/25 bg-lab-green/[0.06] px-3 py-2 text-lab-green">
+            Evidence {roleDelta.evidenceConfidence}
+          </span>
+          <span className="rounded-md border border-lab-amber/25 bg-lab-amber/[0.06] px-3 py-2 text-lab-amber">
+            Causal {roleDelta.causalConfidence}
+          </span>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_auto_1fr] lg:items-center">
+        <RivalParticipantCard participant={roleDelta.player} title="Searched player" />
+        <div className="hidden text-center text-sm font-semibold text-lab-muted lg:block">vs</div>
+        <RivalParticipantCard participant={roleDelta.opponent} title="Direct role opponent" />
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <MiniAnalysisFact label="Final result" value={roleDelta.finalResult} />
+        <MiniAnalysisFact label="Profile" value={roleDelta.profileSummary} />
+        <MiniAnalysisFact label="Final gold" value={formatSigned(finalDelta.goldEarned)} />
+        <MiniAnalysisFact label="Final KDA ratio" value={formatSignedNullable(finalDelta.kdaRatio)} />
+        <MiniAnalysisFact label="Final vision" value={formatSigned(finalDelta.visionScore)} />
+        <MiniAnalysisFact label="Kills" value={formatSigned(finalDelta.kills)} />
+        <MiniAnalysisFact label="Deaths" value={formatSigned(finalDelta.deaths)} />
+        <MiniAnalysisFact label="Assists" value={formatSigned(finalDelta.assists)} />
+        <MiniAnalysisFact label="Kill participation" value={formatSignedPercent(finalDelta.killParticipation)} />
+        <MiniAnalysisFact label="Final CS" value={formatSigned(finalDelta.totalCs)} />
+        <MiniAnalysisFact label="CS/min" value={formatSigned(finalDelta.csPerMinute)} />
+        <MiniAnalysisFact label="Damage to champions" value={formatSignedNullable(finalDelta.damageToChampions)} />
+        <MiniAnalysisFact label="Damage to objectives" value={formatSignedNullable(finalDelta.damageToObjectives)} />
+        <MiniAnalysisFact label="Damage to turrets" value={formatSignedNullable(finalDelta.damageToTurrets)} />
+        <MiniAnalysisFact label="Damage taken" value={formatSignedNullable(finalDelta.totalDamageTaken)} />
+        <MiniAnalysisFact label="Wards placed" value={formatSignedNullable(finalDelta.wardsPlaced)} />
+        <MiniAnalysisFact label="Wards killed" value={formatSignedNullable(finalDelta.wardsKilled)} />
+      </div>
+
+      <div className="mt-5 grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+        <div className="rounded-md border border-white/[0.06] bg-lab-panel2/50 p-4">
+          <p className="label-muted">Key checkpoints</p>
+          <CompactList
+            items={keyCheckpoints.map(
+              (checkpoint) =>
+                `${checkpoint.minute}m: ${formatSigned(checkpoint.totalGoldDelta)} gold, ${formatSigned(checkpoint.totalCsDelta)} CS, ${formatSigned(checkpoint.levelDelta)} level${checkpoint.xpDelta === null ? "" : `, ${formatSigned(checkpoint.xpDelta)} XP`}`,
+            )}
+            emptyText="Timeline checkpoint deltas unavailable."
+          />
+        </div>
+        <div className="rounded-md border border-white/[0.06] bg-lab-panel2/50 p-4">
+          <p className="label-muted">Interpretation</p>
+          <p className="mt-3 text-sm leading-6 text-slate-300">{supportText}</p>
+          <p className="mt-3 text-sm leading-6 text-slate-300">{roleDelta.classificationReason}</p>
+          <p className="mt-3 text-sm leading-6 text-lab-muted">
+            Riot API confirms the stat difference, but VOD context is needed to evaluate wave
+            state, matchup, pressure, rotations, and decision quality.
+          </p>
+          <p className="mt-3 text-sm leading-6 text-lab-muted">
+            Damage taken is contextual and requires VOD/fight context to evaluate.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function RivalParticipantCard({
+  participant,
+  title,
+}: {
+  participant: NonNullable<PreliminaryRiftLabReport["deepAnalysis"]["rivalRoleDelta"]["player"]>;
+  title: string;
+}) {
+  return (
+    <div className="rounded-md border border-white/[0.07] bg-lab-panel2/60 p-4">
+      <p className="label-muted">{title}</p>
+      <div className="mt-3 flex items-center gap-3">
+        <AssetIcon src={getChampionIconUrl(participant.championName, undefined)} label={participant.championName} />
+        <div>
+          <p className="font-semibold text-lab-text">{participant.label}</p>
+          <p className="mt-1 text-sm text-lab-muted">
+            {participant.role} - {participant.teamSide}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DeepAnalysisSections({ report }: { report: PreliminaryRiftLabReport }) {
   const analysis = report.deepAnalysis;
-  const roleDelta = analysis.rivalRoleDelta;
-  const finalDelta = roleDelta.finalDeltas;
 
   return (
     <div className="mt-7 grid gap-4 xl:grid-cols-2">
-      <AnalysisCard title="Rival Role Delta" subtitle={roleDelta.opponentLabel}>
-        <p className="text-sm leading-6 text-slate-300">{roleDelta.explanation}</p>
-        <div className="mt-4 grid gap-2 sm:grid-cols-2">
-          <MiniAnalysisFact label="Final gold" value={formatSigned(finalDelta.goldEarned)} />
-          <MiniAnalysisFact label="Final CS" value={formatSigned(finalDelta.totalCs)} />
-          <MiniAnalysisFact label="CS/min" value={formatSigned(finalDelta.csPerMinute)} />
-          <MiniAnalysisFact label="Vision" value={formatSigned(finalDelta.visionScore)} />
-        </div>
-        <CompactList
-          items={roleDelta.checkpoints.slice(0, 4).map(
-            (checkpoint) =>
-              `${checkpoint.minute}m: ${formatSigned(checkpoint.totalGoldDelta)} gold, ${formatSigned(checkpoint.totalCsDelta)} CS, ${formatSigned(checkpoint.levelDelta)} level`,
-          )}
-          emptyText="Checkpoint role deltas were not available."
-        />
-      </AnalysisCard>
-
       <AnalysisCard title="Death Cost Profile" subtitle={`${analysis.deathCostProfile.totalDeaths} total death(s)`}>
         <div className="grid gap-2 sm:grid-cols-3">
           <MiniAnalysisFact label="High cost" value={analysis.deathCostProfile.highCostDeaths} />
@@ -1011,6 +1153,14 @@ function formatSigned(value: number): string {
   return value > 0 ? `+${value}` : `${value}`;
 }
 
+function formatSignedNullable(value: number | null): string {
+  return value === null ? "Unavailable" : formatSigned(value);
+}
+
+function formatSignedPercent(value: number | null): string {
+  return value === null ? "Unavailable" : `${formatSigned(Math.round(value * 100))} pts`;
+}
+
 function formatCategoryLabel(label: string): string {
   return label
     .split("_")
@@ -1019,12 +1169,96 @@ function formatCategoryLabel(label: string): string {
     .join(" ");
 }
 
+function AssetStrip({
+  title,
+  emptyText,
+  children,
+}: {
+  title: string;
+  emptyText: string;
+  children: React.ReactNode;
+}) {
+  const hasChildren = Array.isArray(children) ? children.length > 0 : Boolean(children);
+
+  return (
+    <div className="quiet-surface p-4">
+      <p className="label-muted">{title}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {hasChildren ? children : <p className="text-sm text-lab-muted">{emptyText}</p>}
+      </div>
+    </div>
+  );
+}
+
+function AssetIcon({
+  src,
+  label,
+  size = "md",
+}: {
+  src: string | null;
+  label: string;
+  size?: "sm" | "md" | "lg";
+}) {
+  const [failed, setFailed] = useState(false);
+  const sizeClass = size === "lg" ? "h-16 w-16" : size === "sm" ? "h-7 w-7" : "h-10 w-10";
+  const textClass = size === "sm" ? "text-[0.58rem]" : "text-xs";
+
+  return (
+    <span
+      title={label}
+      className={`${sizeClass} inline-flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/[0.08] bg-black/30 align-middle`}
+    >
+      {src && !failed ? (
+        <Image
+          src={src}
+          alt={label}
+          width={size === "lg" ? 64 : size === "sm" ? 28 : 40}
+          height={size === "lg" ? 64 : size === "sm" ? 28 : 40}
+          className="h-full w-full object-cover"
+          unoptimized
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <span className={`${textClass} font-semibold text-lab-cyan`}>{label.slice(0, 2)}</span>
+      )}
+    </span>
+  );
+}
+
+function ParticipantLabel({
+  participantId,
+  participants,
+  gameVersion,
+}: {
+  participantId: number | null | undefined;
+  participants: RiotReportParticipant[];
+  gameVersion: string;
+}) {
+  const participant = participants.find((entry) => entry.participantId === participantId);
+  const label = formatParticipantIdForUser(participantId, participants);
+
+  return (
+    <span className="inline-flex items-center gap-2">
+      {participant ? (
+        <AssetIcon
+          src={getChampionIconUrl(participant.championName, gameVersion)}
+          label={participant.championName}
+          size="sm"
+        />
+      ) : null}
+      <span>{label}</span>
+    </span>
+  );
+}
+
 function TimelineDiagnosticsPanel({
   diagnostics,
   participants,
+  gameVersion,
 }: {
   diagnostics: TimelineDiagnostics;
-  participants: NonNullable<Parameters<typeof formatParticipantIdForUser>[1]>;
+  participants: RiotReportParticipant[];
+  gameVersion: string;
 }) {
   return (
     <section className="mt-7 rounded-md border border-white/[0.07] bg-lab-panel/80 p-5">
@@ -1033,7 +1267,12 @@ function TimelineDiagnosticsPanel({
         <h5 className="mt-2 text-xl font-semibold text-lab-text">Raw Match-V5 timeline signals</h5>
         <div className="mt-3 flex flex-wrap gap-2 text-sm text-lab-muted">
           <span className="quiet-surface px-3 py-2">
-            Participant {formatParticipantIdForUser(diagnostics.participantId, participants)}
+            Participant{" "}
+            <ParticipantLabel
+              participantId={diagnostics.participantId}
+              participants={participants}
+              gameVersion={gameVersion}
+            />
           </span>
           <span className="quiet-surface px-3 py-2">Frames {diagnostics.frameCount}</span>
           <span className="quiet-surface px-3 py-2">Events parsed {diagnostics.parsedEventCount}</span>
@@ -1045,11 +1284,27 @@ function TimelineDiagnosticsPanel({
           {diagnostics.playerDeaths.map((event, index) => (
             <DiagnosticRow key={`${event.timestamp}-${index}`}>
               <span>{event.timestamp}</span>
-              <span>Killer: {formatParticipantIdForUser(event.killerParticipantId, participants)}</span>
+              <span>
+                Killer:{" "}
+                <ParticipantLabel
+                  participantId={event.killerParticipantId}
+                  participants={participants}
+                  gameVersion={gameVersion}
+                />
+              </span>
               <span>
                 Assists:{" "}
                 {event.assistingParticipantIds.length > 0
-                  ? formatParticipantIdsForUser(event.assistingParticipantIds, participants)
+                  ? event.assistingParticipantIds.map((participantId, assistIndex) => (
+                      <span key={participantId} className="inline-flex items-center">
+                        {assistIndex > 0 ? <span className="mx-1 text-lab-muted">,</span> : null}
+                        <ParticipantLabel
+                          participantId={participantId}
+                          participants={participants}
+                          gameVersion={gameVersion}
+                        />
+                      </span>
+                    ))
                   : "None"}
               </span>
             </DiagnosticRow>

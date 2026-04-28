@@ -1,20 +1,36 @@
 import Link from "next/link";
-import { ArrowRight, Swords } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 import type { MatchSummary } from "@/lib/types";
 import { getScoreColorVariant } from "@/lib/scoring";
 import { cn } from "@/lib/utils";
+import { getChampionIconUrl } from "@/lib/datadragon";
 
 type MatchCardProps = {
   match: MatchSummary;
 };
 
 export function MatchCard({ match }: MatchCardProps) {
+  const championIconUrl = getChampionIconUrl(match.champion, undefined);
+
   return (
     <article className="rounded-md border border-white/[0.07] bg-lab-panel/80 p-5 transition hover:border-lab-cyan/25 hover:bg-lab-panel2/80">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-white/[0.07] bg-black/24">
-            <Swords className="h-5 w-5 text-lab-cyan" aria-hidden="true" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/[0.07] bg-black/24">
+            {championIconUrl ? (
+              <Image
+                src={championIconUrl}
+                alt=""
+                width={48}
+                height={48}
+                className="h-full w-full object-cover"
+                unoptimized
+                aria-hidden="true"
+              />
+            ) : (
+              <span className="text-xs font-semibold text-lab-cyan">{match.champion.slice(0, 2)}</span>
+            )}
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">

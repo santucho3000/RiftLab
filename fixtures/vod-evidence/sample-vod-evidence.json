@@ -1,0 +1,212 @@
+{
+  "schemaVersion": "vod-evidence.v0.1",
+  "source": {
+    "type": "manual_annotation",
+    "toolName": "riftlab-fixture",
+    "toolVersion": "0.1.0",
+    "modelVersion": "none",
+    "inputKind": "annotation",
+    "inputHash": "sha256:sample-fixture-only",
+    "createdAt": "2026-04-28T00:00:00.000Z"
+  },
+  "match": {
+    "matchId": "LA2_0000000000",
+    "gameVersion": "15.8.1",
+    "region": "LAS",
+    "durationSeconds": 1800,
+    "timeAlignment": {
+      "method": "manual",
+      "videoStartOffsetMs": 0,
+      "confidence": 0.9
+    }
+  },
+  "coordinateSystem": {
+    "type": "summoners_rift_normalized",
+    "xRange": [0, 1],
+    "yRange": [0, 1],
+    "origin": "blue_bottom_left",
+    "notes": "Fixture coordinates are normalized map positions, not screen pixels."
+  },
+  "participants": [
+    {
+      "participantId": 2,
+      "teamSide": "Blue",
+      "championName": "LeeSin",
+      "riotPuuid": null,
+      "detectorLabel": "leesin"
+    },
+    {
+      "participantId": 3,
+      "teamSide": "Blue",
+      "championName": "Zoe",
+      "riotPuuid": null,
+      "detectorLabel": "zoe"
+    },
+    {
+      "participantId": 8,
+      "teamSide": "Red",
+      "championName": "Orianna",
+      "riotPuuid": null,
+      "detectorLabel": "orianna"
+    }
+  ],
+  "championTracks": [
+    {
+      "participantId": 3,
+      "championName": "Zoe",
+      "samples": [
+        {
+          "t": 575,
+          "x": 0.48,
+          "y": 0.51,
+          "confidence": 0.88,
+          "visibility": "visible",
+          "sourceFrame": 17250
+        },
+        {
+          "t": 600,
+          "x": 0.54,
+          "y": 0.56,
+          "confidence": 0.82,
+          "visibility": "visible",
+          "sourceFrame": 18000
+        }
+      ],
+      "trackConfidence": 0.85,
+      "gaps": []
+    },
+    {
+      "participantId": 2,
+      "championName": "LeeSin",
+      "samples": [
+        {
+          "t": 575,
+          "x": 0.43,
+          "y": 0.55,
+          "confidence": 0.86,
+          "visibility": "visible",
+          "sourceFrame": 17250
+        },
+        {
+          "t": 600,
+          "x": 0.52,
+          "y": 0.58,
+          "confidence": 0.8,
+          "visibility": "visible",
+          "sourceFrame": 18000
+        }
+      ],
+      "trackConfidence": 0.83,
+      "gaps": []
+    }
+  ],
+  "wardSamples": [
+    {
+      "t": 588,
+      "teamSide": "Blue",
+      "wardType": "control",
+      "x": 0.52,
+      "y": 0.47,
+      "confidence": 0.74,
+      "status": "detected"
+    }
+  ],
+  "objectivePresenceSignals": [
+    {
+      "objectiveType": "Rift Herald",
+      "windowStart": 570,
+      "windowEnd": 630,
+      "bluePresentParticipantIds": [2, 3],
+      "redPresentParticipantIds": [8],
+      "blueArrivalOrder": [3, 2],
+      "redArrivalOrder": [8],
+      "controllingSide": "Blue",
+      "confidence": 0.72
+    }
+  ],
+  "rotationSignals": [
+    {
+      "id": "rot-001",
+      "participantId": 3,
+      "startTime": 555,
+      "endTime": 602,
+      "fromRegion": "mid_lane",
+      "toRegion": "top_river",
+      "rotationType": "first_move",
+      "arrivedBeforeOpponentSeconds": 8,
+      "confidence": 0.7
+    }
+  ],
+  "teamSpacingSignals": [
+    {
+      "id": "space-001",
+      "time": 600,
+      "teamSide": "Blue",
+      "context": "pre_objective",
+      "averageDistance": 0.14,
+      "isolatedParticipantIds": [],
+      "clusterParticipantIds": [2, 3],
+      "confidence": 0.69
+    }
+  ],
+  "zoneControlSignals": [
+    {
+      "id": "zone-001",
+      "windowStart": 570,
+      "windowEnd": 630,
+      "region": "top_river",
+      "controllingSide": "Blue",
+      "blueOccupancySeconds": 48,
+      "redOccupancySeconds": 18,
+      "wardCoverage": {
+        "blue": 0.55,
+        "red": 0.25
+      },
+      "confidence": 0.66
+    }
+  ],
+  "fightSetupSignals": [
+    {
+      "id": "fight-setup-001",
+      "windowStart": 610,
+      "windowEnd": 645,
+      "fightEventIds": ["fixture-riot-event-001"],
+      "blueFormation": "grouped_river_entry",
+      "redFormation": "single_mid_hover",
+      "playerContext": {
+        "participantId": 3,
+        "state": "backline",
+        "distanceFromTeam": 0.08
+      },
+      "confidence": 0.58
+    }
+  ],
+  "waveStateSignals": [
+    {
+      "id": "wave-001",
+      "time": 600,
+      "lane": "Mid",
+      "state": "pushing_red",
+      "confidence": 0.42,
+      "notes": "Low-confidence fixture value; wave state requires future validation."
+    }
+  ],
+  "ocrSignals": [
+    {
+      "time": 600,
+      "field": "game_clock",
+      "value": "10:00",
+      "confidence": 0.95
+    }
+  ],
+  "quality": {
+    "overallConfidence": 0.7,
+    "minimapConfidence": 0.76,
+    "ocrConfidence": 0.95,
+    "frameSampleRate": 1,
+    "unsupportedReasons": [],
+    "warnings": [
+      "Fixture is manually authored and should not be treated as real VOD output."
+    ]
+  }
+}

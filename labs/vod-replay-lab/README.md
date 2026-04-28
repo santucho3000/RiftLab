@@ -18,6 +18,8 @@ The goal is to learn whether spatial evidence can improve RiftLab's Causal Impac
 
 See `docs/vod-replay-lab-plan.md` for the full plan.
 
+The future evidence fusion rules are specified in `docs/vod-evidence-fusion-spec.md`. Fusion is still research-only: VOD evidence does not affect current scoring, current Riot API reports, or production Causal Impact Engine behavior.
+
 ## Fixtures
 
 Fixtures in `labs/vod-replay-lab/fixtures` are manually authored research data. They are not real VOD output and should not be used for production scoring.
@@ -75,3 +77,7 @@ It compares each API-only Causal Impact Chain with a VOD/spatially enriched inte
 - scoring impact recommendation for future research
 
 This is still research-only. It does not change production scoring, does not change the Riot API report, and does not connect VOD evidence to the current app.
+
+## Fusion Rule Drafts
+
+`labs/vod-replay-lab/fusion-rules.ts` contains a machine-readable draft of future fusion rules. These rules are static research metadata only. They are not imported by production scoring and should not be treated as active product logic.

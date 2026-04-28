@@ -81,9 +81,13 @@ export type RiotTimelineEventDto = {
   buildingType?: string;
   towerType?: string;
   laneType?: string;
+  itemId?: number;
+  beforeId?: number;
+  afterId?: number;
 };
 
 export type RiotParticipantDto = {
+  participantId?: number;
   puuid: string;
   riotIdGameName?: string;
   riotIdTagline?: string;
@@ -98,6 +102,9 @@ export type RiotParticipantDto = {
   neutralMinionsKilled: number;
   goldEarned: number;
   visionScore: number;
+  totalDamageDealtToChampions?: number;
+  damageDealtToObjectives?: number;
+  damageDealtToTurrets?: number;
   summonerLevel?: number;
   win: boolean;
 };

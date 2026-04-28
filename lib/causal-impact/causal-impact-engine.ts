@@ -1,4 +1,4 @@
-import { formatLaneForUser, formatStructureForUser } from "@/lib/formatters/riot-display";
+import { formatLaneForUser, formatRoleForUser, formatStructureForUser } from "@/lib/formatters/riot-display";
 import type { BuildingEvent, ChampionKillEvent, RiotMatchSummary, TimelineDiagnostics } from "@/lib/reports";
 
 export type ImpactChainType =
@@ -607,19 +607,23 @@ function detectDeathToStructureLossChains(
           building.towerType ?? building.buildingType,
           buildingSeconds,
         );
-        const causalConfidence = getCausalConfidenceForLaneRelevance(laneRelevance);
-        const originalSeverity = secondsAfterDeath <= 40 ? "High" : "Medium";
-        const severity = getStructureLossSeverityForLaneRelevance(laneRelevance, originalSeverity);
-        const scoreImpact = -getStructureLossCost(laneRelevance);
         const phase = getGamePhase(buildingSeconds);
+        const towerOrBuildingType = building.towerType ?? building.buildingType;
+        const causalConfidence = getCausalConfidenceForStructureLoss(laneRelevance, towerOrBuildingType, phase);
+        const originalSeverity = secondsAfterDeath <= 40 ? "High" : "Medium";
+        const severity = getStructureLossSeverityForStructure(laneRelevance, originalSeverity, towerOrBuildingType, phase);
+        const scoreImpact = -getStructureLossCostForStructure(laneRelevance, towerOrBuildingType, phase);
 
         console.info("[RiftLab causal v0.1] structure lane relevance decision:", {
           structureLane: building.laneType,
+          rawTowerType: building.towerType,
+          formattedStructureName: structureName,
           playerRole: summary.position,
           gamePhase: phase,
           laneRelevance,
           originalSeverity,
           adjustedSeverity: severity,
+          lateGameMajorStructureAdjustment: isLateGameMajorStructure(towerOrBuildingType, phase),
           finalScoreDelta: scoreImpact,
         });
 
@@ -645,8 +649,10 @@ function detectDeathToStructureLossChains(
           consequence: step("Allied structure fell", building.timestamp, "BUILDING_KILL", building.teamAffected, `Your team lost ${structureName}.`),
           mapImpact: step("Structure outcome changed", building.timestamp, "STRUCTURE_LOSS", summary.teamSide, "API confirms timing and structure loss; map setup requires future VOD context."),
           userFacingSummary:
-            laneRelevance === "low"
-              ? `Your death was followed by an allied ${structureName} falling, but because you were playing ${normalizePlayerRole(summary.position)} and this was ${getPhaseArticle(phase)} ${phase} ${formatLaneForUser(building.laneType) || "unknown lane"} structure, RiftLab applies low causal confidence and only a small structure-loss cost.`
+            isNexusStructure(towerOrBuildingType)
+              ? `Your death was followed by Nexus tower loss, but this late-game structure loss depends on broader map state. VOD context is needed to assess responsibility.`
+              : laneRelevance === "low"
+              ? `Your death was followed by an allied ${structureName} falling, but because you were playing ${formatRoleForUser(summary.position)} and this was ${getPhaseArticle(phase)} ${phase} ${formatLaneForUser(building.laneType) || "unknown lane"} structure, RiftLab applies low causal confidence and only a small structure-loss cost.`
               : `Your death at ${death.timestamp} was followed by your team's ${structureName} falling ${secondsAfterDeath} seconds later. Riot API confirms the timing and structure outcome. RiftLab treats this as a ${causalConfidence}-confidence structure-loss association; VOD context is needed to confirm wave state, lane assignment, positioning, and intent.`,
         });
       })
@@ -1020,10 +1026,34 @@ export function getStructureLossCost(laneRelevance: LaneRelevance): number {
   return 4;
 }
 
+export function getStructureLossCostForStructure(
+  laneRelevance: LaneRelevance,
+  towerType: string | null,
+  gamePhase: GamePhase,
+): number {
+  if (isNexusStructure(towerType)) return laneRelevance === "high" ? 7 : 5;
+  if (isBaseTowerStructure(towerType)) return laneRelevance === "high" && gamePhase !== "late" ? 8 : 6;
+
+  return getStructureLossCost(laneRelevance);
+}
+
 export function getCausalConfidenceForLaneRelevance(laneRelevance: LaneRelevance): ChainConfidence {
   if (laneRelevance === "high") return "medium";
   if (laneRelevance === "medium") return "low/medium";
   return "low";
+}
+
+export function getCausalConfidenceForStructureLoss(
+  laneRelevance: LaneRelevance,
+  towerType: string | null,
+  gamePhase: GamePhase,
+): ChainConfidence {
+  if (isNexusStructure(towerType)) return "low/medium";
+  if (isBaseTowerStructure(towerType) && gamePhase !== "early") {
+    return laneRelevance === "high" ? "medium" : "low/medium";
+  }
+
+  return getCausalConfidenceForLaneRelevance(laneRelevance);
 }
 
 export function getStructureLossSeverityForLaneRelevance(
@@ -1035,6 +1065,25 @@ export function getStructureLossSeverityForLaneRelevance(
   return "Low";
 }
 
+export function getStructureLossSeverityForStructure(
+  laneRelevance: LaneRelevance,
+  originalSeverity: "Low" | "Medium" | "High",
+  towerType: string | null,
+  gamePhase: GamePhase,
+): "Low" | "Medium" | "High" {
+  const laneAdjustedSeverity = getStructureLossSeverityForLaneRelevance(laneRelevance, originalSeverity);
+
+  if (isNexusStructure(towerType)) {
+    return "Medium";
+  }
+
+  if (isBaseTowerStructure(towerType) && gamePhase !== "early") {
+    return laneAdjustedSeverity === "Low" ? "Low" : "Medium";
+  }
+
+  return laneAdjustedSeverity;
+}
+
 export function buildStructureLossRelevanceExplanation(
   playerRole: string,
   structureLane: string | null,
@@ -1042,9 +1091,17 @@ export function buildStructureLossRelevanceExplanation(
   gamePhase: GamePhase,
   laneRelevance: LaneRelevance,
 ): string {
-  const role = normalizePlayerRole(playerRole);
+  const role = formatRoleForUser(playerRole);
   const lane = formatLaneForUser(structureLane) || "unknown lane";
   const structure = formatStructureForUser(null, towerType);
+
+  if (isNexusStructure(towerType)) {
+    return "Your death was followed by Nexus tower loss, but this late-game structure loss depends on broader map state. VOD context is needed to assess responsibility.";
+  }
+
+  if (isBaseTowerStructure(towerType) && gamePhase !== "early") {
+    return `This ${structure} loss happened after laning phase, so RiftLab treats it as a broader map-state event with conservative causal confidence. VOD context is needed to assess wave state, Baron/Elder pressure, positioning, and teamfight context.`;
+  }
 
   if (laneRelevance === "low") {
     return `Because you were playing ${role} and this was ${getPhaseArticle(gamePhase)} ${gamePhase} ${lane} ${structure}, RiftLab applies low causal confidence and only a small structure-loss cost.`;
@@ -1075,6 +1132,20 @@ function isInhibitorOrBaseStructure(towerType: string | null): boolean {
   if (!towerType) return false;
 
   return towerType.includes("INHIBITOR") || towerType.includes("BASE") || towerType.includes("NEXUS");
+}
+
+function isBaseTowerStructure(towerType: string | null): boolean {
+  if (!towerType) return false;
+
+  return towerType.includes("INHIBITOR") || towerType.includes("BASE");
+}
+
+function isNexusStructure(towerType: string | null): boolean {
+  return Boolean(towerType?.includes("NEXUS"));
+}
+
+function isLateGameMajorStructure(towerType: string | null, gamePhase: GamePhase): boolean {
+  return gamePhase !== "early" && (isBaseTowerStructure(towerType) || isNexusStructure(towerType));
 }
 
 function getPhaseArticle(gamePhase: GamePhase): "a" | "an" {

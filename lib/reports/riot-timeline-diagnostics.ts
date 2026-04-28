@@ -1,3 +1,4 @@
+import { formatObjectiveTypeForUser, formatParticipantIdForUser } from "@/lib/formatters/riot-display";
 import type { RiotTimelineDto, RiotTimelineEventDto } from "@/lib/adapters/riot-types";
 
 export type TimelineDiagnostics = {
@@ -7,7 +8,9 @@ export type TimelineDiagnostics = {
   championKillEvents: ChampionKillEvent[];
   eliteMonsterEvents: EliteMonsterEvent[];
   buildingEvents: BuildingEvent[];
+  itemEvents: ItemEvent[];
   frameSnapshots: PlayerFrameSnapshot[];
+  participantFrameSnapshots: ParticipantFrameSnapshot[];
   frameCount: number;
   parsedEventCount: number;
 };
@@ -30,6 +33,7 @@ export type ChampionKillEvent = {
 export type EliteMonsterEvent = {
   timestamp: string;
   monsterType: string;
+  rawMonsterType: string | null;
   monsterSubType: string | null;
   killerTeam: "Blue" | "Red" | "Unknown";
 };
@@ -42,6 +46,14 @@ export type BuildingEvent = {
   teamAffected: "Blue" | "Red" | "Unknown";
 };
 
+export type ItemEvent = {
+  timestamp: string;
+  participantId: number;
+  eventType: string;
+  itemId: number | null;
+  rawItemId: number | null;
+};
+
 export type PlayerFrameSnapshot = {
   minute: number;
   currentGold: number;
@@ -50,6 +62,10 @@ export type PlayerFrameSnapshot = {
   minionsKilled: number;
   jungleMinionsKilled: number;
   position: { x: number; y: number } | null;
+};
+
+export type ParticipantFrameSnapshot = PlayerFrameSnapshot & {
+  participantId: number;
 };
 
 export function buildTimelineDiagnostics(
@@ -86,6 +102,7 @@ export function buildTimelineDiagnostics(
     .map((event) => ({
       timestamp: formatTimestamp(event.timestamp),
       monsterType: normalizeMonsterType(event),
+      rawMonsterType: event.monsterType ?? null,
       monsterSubType: event.monsterSubType ?? null,
       killerTeam: getTeamSide(event.killerTeamId),
     }));
@@ -97,6 +114,15 @@ export function buildTimelineDiagnostics(
       towerType: event.towerType ?? null,
       laneType: event.laneType ?? null,
       teamAffected: getTeamSide(event.teamId),
+    }));
+  const itemEvents = events
+    .filter((event) => event.type === "ITEM_PURCHASED" || event.type === "ITEM_DESTROYED" || event.type === "ITEM_UNDO")
+    .map((event) => ({
+      timestamp: formatTimestamp(event.timestamp),
+      participantId: event.participantId ?? 0,
+      eventType: event.type,
+      itemId: event.itemId ?? event.afterId ?? null,
+      rawItemId: event.itemId ?? event.afterId ?? null,
     }));
   const frameSnapshots = timeline.info.frames
     .filter((frame) => {
@@ -121,10 +147,44 @@ export function buildTimelineDiagnostics(
       };
     })
     .filter((snapshot): snapshot is PlayerFrameSnapshot => snapshot !== null);
+  const participantFrameSnapshots = timeline.info.frames
+    .filter((frame) => {
+      const minute = Math.round(frame.timestamp / 60000);
+      return minute > 0 && minute % 5 === 0;
+    })
+    .flatMap((frame) => {
+      const minute = Math.round(frame.timestamp / 60000);
+
+      return Object.values(frame.participantFrames).map((participantFrame) => ({
+        participantId: participantFrame.participantId,
+        minute,
+        currentGold: participantFrame.currentGold,
+        totalGold: participantFrame.totalGold,
+        level: participantFrame.level,
+        minionsKilled: participantFrame.minionsKilled,
+        jungleMinionsKilled: participantFrame.jungleMinionsKilled,
+        position: participantFrame.position ?? null,
+      }));
+    });
 
   console.info("[RiftLab Riot] timeline frames:", timeline.info.frames.length);
   console.info("[RiftLab Riot] timeline events parsed:", events.length);
   console.info("[RiftLab Riot] timeline participantId:", participantId);
+  console.info(
+    "[RiftLab Riot] participant display labels:",
+    collectParticipantIdsForLogs(playerDeaths, championKillEvents)
+      .map((id) => ({ rawParticipantId: id, formattedParticipantLabel: formatParticipantIdForUser(id) }))
+      .slice(0, 20),
+  );
+  console.info(
+    "[RiftLab Riot] elite objective display labels:",
+    eliteMonsterEvents.map((event) => ({
+      rawMonsterType: event.rawMonsterType,
+      formattedObjectiveName: event.monsterType,
+      timestamp: event.timestamp,
+    })),
+  );
+  console.info("[RiftLab Riot] item timing events:", itemEvents.length);
 
   return {
     matchId: timeline.metadata.matchId,
@@ -133,19 +193,16 @@ export function buildTimelineDiagnostics(
     championKillEvents,
     eliteMonsterEvents,
     buildingEvents,
+    itemEvents,
     frameSnapshots,
+    participantFrameSnapshots,
     frameCount: timeline.info.frames.length,
     parsedEventCount: events.length,
   };
 }
 
 function normalizeMonsterType(event: RiotTimelineEventDto): string {
-  if (event.monsterSubType === "ELDER_DRAGON") return "Elder Dragon";
-  if (event.monsterType === "HORDE") return "Voidgrubs/Horde";
-  if (event.monsterType === "DRAGON") return "Dragon";
-  if (event.monsterType === "RIFTHERALD") return "Rift Herald";
-  if (event.monsterType === "BARON_NASHOR") return "Baron";
-  return event.monsterType ?? "Unknown monster";
+  return formatObjectiveTypeForUser(event.monsterType, event.monsterSubType);
 }
 
 function getTeamSide(teamId: number | undefined): "Blue" | "Red" | "Unknown" {
@@ -159,6 +216,26 @@ function getParticipantTeamSide(participantId: number | undefined): "Blue" | "Re
   if (participantId <= 5) return "Blue";
   if (participantId <= 10) return "Red";
   return "Unknown";
+}
+
+function collectParticipantIdsForLogs(
+  playerDeaths: PlayerDeathEvent[],
+  championKillEvents: ChampionKillEvent[],
+): number[] {
+  const ids = new Set<number>();
+
+  for (const death of playerDeaths) {
+    if (death.killerParticipantId) ids.add(death.killerParticipantId);
+    for (const assistId of death.assistingParticipantIds) ids.add(assistId);
+  }
+
+  for (const event of championKillEvents) {
+    if (event.killerParticipantId) ids.add(event.killerParticipantId);
+    if (event.victimParticipantId) ids.add(event.victimParticipantId);
+    for (const assistId of event.assistingParticipantIds) ids.add(assistId);
+  }
+
+  return [...ids].sort((a, b) => a - b);
 }
 
 function formatTimestamp(timestampMs: number): string {

@@ -1,17 +1,19 @@
 import {
   buildStructureLossRelevanceExplanation,
   generateCausalImpactChains,
-  getCausalConfidenceForLaneRelevance,
+  getCausalConfidenceForStructureLoss,
   getGamePhase,
   getLaneRelevanceForStructureLoss,
-  getStructureLossCost,
-  getStructureLossSeverityForLaneRelevance,
+  getStructureLossCostForStructure,
+  getStructureLossSeverityForStructure,
   type ChainConfidence,
   type GamePhase,
   type ImpactChain,
   type LaneRelevance,
 } from "@/lib/causal-impact/causal-impact-engine";
+import { formatObjectiveTypeForUser, formatRoleForUser, formatStructureForUser } from "@/lib/formatters/riot-display";
 import type { EliteMonsterEvent, RiotMatchSummary, TimelineDiagnostics } from "@/lib/reports";
+import { generateDeepAnalysis, type DeepAnalysis } from "@/lib/scoring/deep-analysis";
 import type { MetricScore, MetricStatus } from "@/lib/types";
 
 type Severity = "Low" | "Medium" | "High";
@@ -100,11 +102,25 @@ export type GoldPerMinuteCheckpointPoint = {
   goldPerMinute: number;
 };
 
+export type RivalRoleDeltaPoint = {
+  minute: number;
+  goldDelta: number;
+  csDelta: number;
+  levelDelta: number;
+};
+
+export type TeamfightConversionCountPoint = {
+  label: string;
+  value: number;
+};
+
 export type TelemetryChartData = {
   goldProgression: GoldProgressionPoint[];
   csProgression: CsProgressionPoint[];
+  rivalRoleDelta: RivalRoleDeltaPoint[];
   metricScores: MetricScorePoint[];
   eventCounts: EventCountPoint[];
+  teamfightConversionCounts: TeamfightConversionCountPoint[];
   goldPerMinuteCheckpoints: GoldPerMinuteCheckpointPoint[];
 };
 
@@ -146,6 +162,7 @@ export type PreliminaryRiftLabReport = {
   metrics: MetricScore[];
   signals: RealScoringSignals;
   impactChains: ImpactChain[];
+  deepAnalysis: DeepAnalysis;
   telemetryCharts: TelemetryChartData;
 };
 
@@ -165,7 +182,15 @@ export function generatePreliminaryRiftLabReport(
     .sort((a, b) => b.score - a.score)[0];
   const valueLost = metrics.find((metric) => metric.name === "Value Lost");
   const evidence = buildEvidence(summary, signals);
-  const telemetryCharts = generateTelemetryChartData(diagnostics, metrics, signals, impactChains, summary);
+  const mainImprovementPriority = buildImprovementPriority(signals, impactChains);
+  const deepAnalysis = generateDeepAnalysis({
+    summary,
+    diagnostics,
+    signals,
+    impactChains,
+    mainImprovementPriority,
+  });
+  const telemetryCharts = generateTelemetryChartData(diagnostics, metrics, signals, impactChains, summary, deepAnalysis);
 
   console.info("[RiftLab scoring v0.1] detected deaths:", signals.deathFrequency.deathCount);
   console.info("[RiftLab scoring v0.1] raw elite monster events:", diagnostics.eliteMonsterEvents.length);
@@ -201,7 +226,9 @@ export function generatePreliminaryRiftLabReport(
     generated: true,
     goldPoints: telemetryCharts.goldProgression.length,
     csPoints: telemetryCharts.csProgression.length,
+    rivalRoleDeltaPoints: telemetryCharts.rivalRoleDelta.length,
     metricScoreCount: telemetryCharts.metricScores.length,
+    teamfightConversionCountPoints: telemetryCharts.teamfightConversionCounts.length,
     eventCountSummary: telemetryCharts.eventCounts
       .map((point) => `${point.label}: ${point.value}`)
       .join(", "),
@@ -211,7 +238,7 @@ export function generatePreliminaryRiftLabReport(
     title: "Preliminary Riot API report v0.1",
     mainValueSource: buildMainValueSource(summary, signals, strongestMetric, impactChains),
     mainValueLoss: buildMainValueLoss(summary, signals, valueLost, impactChains),
-    mainImprovementPriority: buildImprovementPriority(signals, impactChains),
+    mainImprovementPriority,
     confidence: "Medium",
     confidenceNotes: [
       "High confidence: deaths, objectives, structures, gold, CS, level, KDA, and vision are direct Riot API fields.",
@@ -222,6 +249,7 @@ export function generatePreliminaryRiftLabReport(
     metrics,
     signals,
     impactChains,
+    deepAnalysis,
     telemetryCharts,
   };
 }
@@ -379,7 +407,7 @@ function getObjectiveTypeKey(monsterType: string): string {
 }
 
 function getObjectiveDisplayType(monsterType: string): string {
-  return getObjectiveTypeKey(monsterType) === "HORDE" ? "Voidgrubs/Horde" : monsterType;
+  return getObjectiveTypeKey(monsterType) === "HORDE" ? "Voidgrubs" : formatObjectiveTypeForUser(monsterType);
 }
 
 function formatObjectiveWindowLabel(window: Pick<GroupedObjectiveWindow, "startTimestamp" | "endTimestamp" | "objectiveType">): string {
@@ -420,16 +448,25 @@ function detectStructureLossAfterDeath(
         );
         const gamePhase = getGamePhase(buildingSeconds);
         const originalSeverity = secondsAfterDeath <= 40 ? "High" : "Medium";
-        const adjustedSeverity = getStructureLossSeverityForLaneRelevance(laneRelevance, originalSeverity);
-        const structureLossCost = getStructureLossCost(laneRelevance);
+        const adjustedSeverity = getStructureLossSeverityForStructure(
+          laneRelevance,
+          originalSeverity,
+          towerOrBuildingType,
+          gamePhase,
+        );
+        const structureLossCost = getStructureLossCostForStructure(laneRelevance, towerOrBuildingType, gamePhase);
 
         console.info("[RiftLab scoring v0.1] structure lane relevance decision:", {
           structureLane: building.laneType,
+          rawTowerType: building.towerType,
+          formattedStructureName: formatStructureForUser(building.laneType, towerOrBuildingType),
           playerRole: summary.position,
           gamePhase,
           laneRelevance,
           originalSeverity,
           adjustedSeverity,
+          lateGameMajorStructureAdjustment:
+            gamePhase !== "early" && (towerOrBuildingType?.includes("BASE") || towerOrBuildingType?.includes("NEXUS")),
           finalScoreDelta: -structureLossCost,
         });
 
@@ -442,7 +479,7 @@ function detectStructureLossAfterDeath(
           teamAffected: building.teamAffected,
           laneRelevance,
           gamePhase,
-          causalConfidence: getCausalConfidenceForLaneRelevance(laneRelevance),
+          causalConfidence: getCausalConfidenceForStructureLoss(laneRelevance, towerOrBuildingType, gamePhase),
           structureLossCost,
           relevanceExplanation: buildStructureLossRelevanceExplanation(
             summary.position,
@@ -465,6 +502,7 @@ function detectGoldCsProgression(
   summary: RiotMatchSummary,
   diagnostics: TimelineDiagnostics,
 ): RealScoringSignals["goldCsProgression"] {
+  const supportRole = isSupportRole(summary.position);
   const checkpoints = diagnostics.frameSnapshots.map((snapshot) => ({
     minute: snapshot.minute,
     csPerMinute: roundOne((snapshot.minionsKilled + snapshot.jungleMinionsKilled) / snapshot.minute),
@@ -472,9 +510,19 @@ function detectGoldCsProgression(
     level: snapshot.level,
   }));
   const lastCheckpoint = checkpoints.at(-1);
-  const stableCs = summary.position === "UTILITY" ? true : (lastCheckpoint?.csPerMinute ?? summary.csPerMinute) >= 6;
-  const lowGoldPerMinute = summary.goldPerMinute < 300 || (lastCheckpoint?.totalGoldPerMinute ?? 999) < 300;
+  const stableCs = supportRole ? true : (lastCheckpoint?.csPerMinute ?? summary.csPerMinute) >= 6;
+  const lowGoldPerMinute = supportRole
+    ? false
+    : summary.goldPerMinute < 300 || (lastCheckpoint?.totalGoldPerMinute ?? 999) < 300;
   const fallingBehind = !stableCs || lowGoldPerMinute;
+
+  console.info("[RiftLab scoring v0.1] farm scoring role decision:", {
+    playerRole: summary.position,
+    formattedRole: formatRoleForUser(summary.position),
+    farmPenaltySkippedDueToSupportRole: supportRole,
+    stableCs,
+    lowGoldPerMinute,
+  });
 
   return {
     checkpoints,
@@ -487,6 +535,7 @@ function detectGoldCsProgression(
 function detectDirectContribution(summary: RiotMatchSummary): RealScoringSignals["directContribution"] {
   const kdaRatio = roundTwo((summary.kills + summary.assists) / Math.max(summary.deaths, 1));
   const lowContributionFlags: string[] = [];
+  const supportRole = isSupportRole(summary.position);
 
   if (summary.killParticipation !== null && summary.killParticipation < 0.35) {
     lowContributionFlags.push("Low kill participation");
@@ -496,13 +545,20 @@ function detectDirectContribution(summary: RiotMatchSummary): RealScoringSignals
     lowContributionFlags.push("Poor KDA ratio");
   }
 
-  if (summary.goldPerMinute < 300) {
+  if (!supportRole && summary.goldPerMinute < 300) {
     lowContributionFlags.push("Low gold per minute");
   }
 
   if (summary.visionScore < getVisionBaseline(summary.position)) {
     lowContributionFlags.push("Low vision score for role/time");
   }
+
+  console.info("[RiftLab scoring v0.1] direct value role decision:", {
+    playerRole: summary.position,
+    formattedRole: formatRoleForUser(summary.position),
+    farmPenaltySkippedDueToSupportRole: supportRole,
+    lowContributionFlags,
+  });
 
   return {
     kdaRatio,
@@ -519,17 +575,22 @@ function generateMetricScores(
   signals: RealScoringSignals,
   impactChains: ImpactChain[],
 ): MetricScore[] {
+  const supportRole = isSupportRole(summary.position);
+  const rivalRoleScoreDelta = getRivalRoleScoreDelta(summary);
   const directValueExplanation = shouldUsePlayableCsDirectValueExplanation(summary, signals)
     ? "CS progression stayed playable, but Direct Value was heavily reduced by low kill participation, poor KDA, and low gold/min."
-    : "Basic direct contribution from KDA, CS, gold, kill participation, and vision.";
+    : supportRole
+      ? "Support Direct Value is based on combat participation, deaths, assists, vision score, and objective-related timing. CS/farm is retained as raw context but not penalized."
+      : "Basic direct contribution from KDA, CS, gold, kill participation, and vision.";
   const structureLossCost = getTotalStructureLossCost(signals.structureLossAfterDeath);
   const directValue = clampScore(
     50 +
-      scoreCs(summary.csPerMinute) +
-      scoreGold(summary.goldPerMinute) +
+      scoreCs(summary.csPerMinute, summary.position) +
+      scoreGold(summary.goldPerMinute, summary.position) +
       scoreKda(signals.directContribution.kdaRatio) +
       scoreKillParticipation(signals.directContribution.killParticipation) +
-      scoreVision(summary.visionScore, summary.position),
+      scoreVision(summary.visionScore, summary.position) +
+      rivalRoleScoreDelta,
   );
   const valueLost = clampScore(
     signals.deathFrequency.deathCount * 8 +
@@ -565,14 +626,22 @@ function generateMetricScores(
   return [
     metric("Direct Value", directValue, directValueExplanation, [
       `KDA ratio: ${signals.directContribution.kdaRatio}.`,
-      `CS/min: ${summary.csPerMinute}, gold/min: ${summary.goldPerMinute}.`,
+      supportRole
+        ? `Support role detected: CS/farm is kept as raw context and is not penalized. Gold/min: ${summary.goldPerMinute}.`
+        : `CS/min: ${summary.csPerMinute}, gold/min: ${summary.goldPerMinute}.`,
       `Kill participation: ${
         summary.killParticipation === null ? "unavailable" : `${Math.round(summary.killParticipation * 100)}%`
       }.`,
+      `Vision score: ${summary.visionScore}.`,
+      `Direct role delta adjustment: ${rivalRoleScoreDelta}.`,
     ]),
     metric("Pressure Value", pressureValue, "Conservative proxy based on deaths that were followed by structure loss.", [
       `${signals.structureLossAfterDeath.length} structure loss window(s) detected after player deaths, weighted to ${structureLossCost} cost by lane relevance.`,
-      signals.goldCsProgression.stableCs ? "CS progression stayed playable." : "CS progression looked weak.",
+      supportRole
+        ? "Support role detected: CS progression is not treated as a farm penalty."
+        : signals.goldCsProgression.stableCs
+          ? "CS progression stayed playable."
+          : "CS progression looked weak.",
     ]),
     metric("Information Value", informationValue, "Vision score is used as a simple proxy until ward intent is analyzed.", [
       `Vision score: ${summary.visionScore}.`,
@@ -633,6 +702,7 @@ function shouldUsePlayableCsDirectValueExplanation(
   const flags = signals.directContribution.lowContributionFlags;
 
   return (
+    !isSupportRole(summary.position) &&
     summary.csPerMinute >= 6 &&
     flags.includes("Low kill participation") &&
     flags.includes("Poor KDA ratio") &&
@@ -676,12 +746,16 @@ function buildMainValueSource(
   }
 
   if (strongestMetric.score < 55) {
-    return signals.goldCsProgression.stableCs
+    return signals.goldCsProgression.stableCs && !isSupportRole(summary.position)
       ? "No strong positive causal chain was detected in this preliminary pass. The most stable signal was CS progression, but it did not convert into measurable map impact."
       : "No strong positive causal chain was detected in this preliminary pass.";
   }
 
   if (strongestMetric.name === "Direct Value") {
+    if (isSupportRole(summary.position)) {
+      return "Your clearest value came from support fundamentals: combat participation, assists, vision score, and available objective timing signals.";
+    }
+
     return `Your clearest value came from direct fundamentals: ${summary.csPerMinute} CS/min, ${summary.goldPerMinute} gold/min, and available combat contribution.`;
   }
 
@@ -776,6 +850,7 @@ function generateTelemetryChartData(
   signals: RealScoringSignals,
   impactChains: ImpactChain[],
   summary: RiotMatchSummary,
+  deepAnalysis: DeepAnalysis,
 ): TelemetryChartData {
   const goldProgression = diagnostics.frameSnapshots.map((snapshot) => ({
     minute: snapshot.minute,
@@ -812,6 +887,16 @@ function generateTelemetryChartData(
     { label: "Negative chains", value: negativeChains },
     { label: "Neutral/trade chains", value: neutralTradeChains },
   ];
+  const rivalRoleDelta = deepAnalysis.rivalRoleDelta.checkpoints.map((checkpoint) => ({
+    minute: checkpoint.minute,
+    goldDelta: checkpoint.totalGoldDelta,
+    csDelta: checkpoint.totalCsDelta,
+    levelDelta: checkpoint.levelDelta,
+  }));
+  const teamfightConversionCounts = [
+    { label: "Allied fight conversions", value: deepAnalysis.teamfightProfile.alliedConversions },
+    { label: "Enemy fight conversions", value: deepAnalysis.teamfightProfile.enemyConversions },
+  ];
   const goldPerMinuteCheckpoints = diagnostics.frameSnapshots.map((snapshot) => ({
     minute: snapshot.minute,
     goldPerMinute: Math.round(snapshot.totalGold / Math.max(snapshot.minute, 1)),
@@ -820,8 +905,10 @@ function generateTelemetryChartData(
   return {
     goldProgression,
     csProgression,
+    rivalRoleDelta,
     metricScores,
     eventCounts,
+    teamfightConversionCounts,
     goldPerMinuteCheckpoints,
   };
 }
@@ -843,14 +930,62 @@ function metric(
   };
 }
 
-function scoreCs(csPerMinute: number): number {
+function isSupportRole(position: string | null | undefined): boolean {
+  const normalized = position?.toUpperCase();
+
+  return normalized === "UTILITY" || normalized === "SUPPORT";
+}
+
+function getRivalRoleScoreDelta(summary: RiotMatchSummary): number {
+  const player = summary.participants.find((participant) => participant.participantId === summary.playerParticipantId);
+  const role = summary.position.toUpperCase();
+
+  if (!player) return 0;
+
+  const opponent = summary.participants.find((participant) => {
+    const participantRole = participant.teamPosition || participant.individualPosition;
+    return participant.teamId !== player.teamId && normalizeRoleForComparison(participantRole) === normalizeRoleForComparison(summary.position);
+  });
+
+  if (!opponent) return 0;
+
+  const supportRole = role === "UTILITY" || role === "SUPPORT";
+  const goldDelta = player.goldEarned - opponent.goldEarned;
+  const csDelta = player.totalCs - opponent.totalCs;
+  const visionDelta = player.visionScore - opponent.visionScore;
+  const kdaDelta = (player.kills + player.assists) / Math.max(player.deaths, 1) -
+    (opponent.kills + opponent.assists) / Math.max(opponent.deaths, 1);
+
+  if (supportRole) {
+    return clampDelta(Math.round(visionDelta / 8) + Math.round(kdaDelta * 2), -6, 6);
+  }
+
+  return clampDelta(Math.round(goldDelta / 600) + Math.round(csDelta / 20) + Math.round(kdaDelta * 2), -8, 8);
+}
+
+function normalizeRoleForComparison(role: string): string {
+  const normalized = role.toUpperCase();
+
+  if (normalized === "MID") return "MIDDLE";
+  if (normalized === "ADC") return "BOTTOM";
+  if (normalized === "SUPPORT") return "UTILITY";
+  return normalized;
+}
+
+function clampDelta(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function scoreCs(csPerMinute: number, position: string): number {
+  if (isSupportRole(position)) return 0;
   if (csPerMinute >= 7) return 10;
   if (csPerMinute >= 6) return 5;
   if (csPerMinute < 4) return -10;
   return 0;
 }
 
-function scoreGold(goldPerMinute: number): number {
+function scoreGold(goldPerMinute: number, position: string): number {
+  if (isSupportRole(position)) return 0;
   if (goldPerMinute >= 400) return 10;
   if (goldPerMinute >= 330) return 5;
   if (goldPerMinute < 280) return -10;

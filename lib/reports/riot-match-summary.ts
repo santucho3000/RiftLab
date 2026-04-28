@@ -1,7 +1,32 @@
 import type { RiotMatchDto, RiotParticipantDto } from "@/lib/adapters/riot-types";
 
+export type RiotReportParticipant = {
+  participantId: number;
+  puuid: string;
+  riotIdGameName: string | null;
+  championName: string;
+  teamId: number;
+  teamSide: "Blue" | "Red" | "Unknown";
+  teamPosition: string;
+  individualPosition: string;
+  kills: number;
+  deaths: number;
+  assists: number;
+  totalCs: number;
+  csPerMinute: number;
+  goldEarned: number;
+  goldPerMinute: number;
+  visionScore: number;
+  killParticipation: number | null;
+  totalDamageDealtToChampions: number | null;
+  damageDealtToObjectives: number | null;
+  damageDealtToTurrets: number | null;
+};
+
 export type RiotMatchSummary = {
   matchId: string;
+  playerParticipantId: number;
+  playerTeamId: number;
   championName: string;
   position: string;
   result: "Win" | "Loss";
@@ -19,6 +44,7 @@ export type RiotMatchSummary = {
   killParticipation: number | null;
   summonerLevel: number | null;
   teamSide: "Blue" | "Red" | "Unknown";
+  participants: RiotReportParticipant[];
 };
 
 export function summarizeParticipantMatch(match: RiotMatchDto, puuid: string): RiotMatchSummary {
@@ -34,6 +60,9 @@ export function summarizeParticipantMatch(match: RiotMatchDto, puuid: string): R
   const result = participant.win ? "Win" : "Loss";
   const teamKills = getTeamKills(match, participant.teamId);
   const killParticipation = teamKills > 0 ? roundTwo((participant.kills + participant.assists) / teamKills) : null;
+  const participants = match.info.participants.map((entry, index) =>
+    normalizeReportParticipant(entry, entry.participantId ?? index + 1, match, durationMinutes),
+  );
 
   console.info("[RiftLab Riot] participant championName:", participant.championName);
   console.info("[RiftLab Riot] participant teamPosition:", position);
@@ -41,6 +70,8 @@ export function summarizeParticipantMatch(match: RiotMatchDto, puuid: string): R
 
   return {
     matchId: match.metadata.matchId,
+    playerParticipantId: participants.find((entry) => entry.puuid === puuid)?.participantId ?? 0,
+    playerTeamId: participant.teamId,
     championName: participant.championName,
     position,
     result,
@@ -58,6 +89,40 @@ export function summarizeParticipantMatch(match: RiotMatchDto, puuid: string): R
     killParticipation,
     summonerLevel: participant.summonerLevel ?? null,
     teamSide: getTeamSide(participant.teamId),
+    participants,
+  };
+}
+
+function normalizeReportParticipant(
+  participant: RiotParticipantDto,
+  participantId: number,
+  match: RiotMatchDto,
+  durationMinutes: number,
+): RiotReportParticipant {
+  const totalCs = getTotalCs(participant);
+  const teamKills = getTeamKills(match, participant.teamId);
+
+  return {
+    participantId,
+    puuid: participant.puuid,
+    riotIdGameName: participant.riotIdGameName ?? null,
+    championName: participant.championName,
+    teamId: participant.teamId,
+    teamSide: getTeamSide(participant.teamId),
+    teamPosition: participant.teamPosition || "",
+    individualPosition: participant.individualPosition || "",
+    kills: participant.kills,
+    deaths: participant.deaths,
+    assists: participant.assists,
+    totalCs,
+    csPerMinute: roundOne(totalCs / durationMinutes),
+    goldEarned: participant.goldEarned,
+    goldPerMinute: Math.round(participant.goldEarned / durationMinutes),
+    visionScore: participant.visionScore,
+    killParticipation: teamKills > 0 ? roundTwo((participant.kills + participant.assists) / teamKills) : null,
+    totalDamageDealtToChampions: participant.totalDamageDealtToChampions ?? null,
+    damageDealtToObjectives: participant.damageDealtToObjectives ?? null,
+    damageDealtToTurrets: participant.damageDealtToTurrets ?? null,
   };
 }
 

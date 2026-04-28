@@ -19,6 +19,9 @@ import {
 } from "@/lib/causal-impact/causal-impact-engine";
 import {
   formatLaneForUser,
+  formatParticipantIdForUser,
+  formatParticipantIdsForUser,
+  formatRoleForUser,
   formatStructureForUser,
 } from "@/lib/formatters/riot-display";
 import type { RiotMatchSummary, TimelineDiagnostics } from "@/lib/reports";
@@ -269,7 +272,7 @@ function RiotMatchSummaryCard({
   const [preliminaryReport, setPreliminaryReport] = useState<PreliminaryRiftLabReport | null>(null);
   const stats = [
     ["Champion", summary.championName],
-    ["Position", summary.position],
+    ["Position", formatRoleForUser(summary.position)],
     ["Result", summary.result],
     ["Duration", summary.duration],
     ["KDA", `${summary.kills} / ${summary.deaths} / ${summary.assists}`],
@@ -338,7 +341,7 @@ function RiotMatchSummaryCard({
         report uses a simple rules-based v0.1 scorer and does not analyze VOD, wave intent, or comms.
       </p>
       {timeline.status === "loaded" ? (
-        <TimelineDiagnosticsPanel diagnostics={timeline.diagnostics} />
+        <TimelineDiagnosticsPanel diagnostics={timeline.diagnostics} participants={summary.participants} />
       ) : null}
       {preliminaryReport ? <PreliminaryReportPanel report={preliminaryReport} /> : null}
       {timeline.status === "error" ? (
@@ -423,6 +426,8 @@ function PreliminaryReportPanel({ report }: { report: PreliminaryRiftLabReport }
         />
       </div>
 
+      <RiftLabVerdictSection report={report} />
+      <DeepAnalysisSections report={report} />
       <CausalImpactChainsSection report={report} />
       <TelemetryChartsSection report={report} />
       <DetectedWindowList report={report} />
@@ -497,6 +502,149 @@ function SignalSummary({ label, value, detail }: { label: string; value: string;
       <p className="mt-2 text-lg font-semibold text-lab-text">{value}</p>
       <p className="mt-2 text-sm leading-6 text-lab-muted">{detail}</p>
     </div>
+  );
+}
+
+function RiftLabVerdictSection({ report }: { report: PreliminaryRiftLabReport }) {
+  const verdict = report.deepAnalysis.verdict;
+
+  return (
+    <section className="mt-7 rounded-md border border-lab-cyan/20 bg-lab-cyan/[0.045] p-4">
+      <p className="label-muted">RiftLab Verdict</p>
+      <h6 className="mt-2 text-xl font-semibold text-lab-text">{verdict.title}</h6>
+      <p className="mt-3 text-sm leading-6 text-slate-300">{verdict.explanation}</p>
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <MiniAnalysisFact label="Positive evidence" value={verdict.strongestPositiveEvidence} />
+        <MiniAnalysisFact label="Negative evidence" value={verdict.strongestNegativeEvidence} />
+        <MiniAnalysisFact label="Priority" value={verdict.mainImprovementPriority} />
+      </div>
+    </section>
+  );
+}
+
+function DeepAnalysisSections({ report }: { report: PreliminaryRiftLabReport }) {
+  const analysis = report.deepAnalysis;
+  const roleDelta = analysis.rivalRoleDelta;
+  const finalDelta = roleDelta.finalDeltas;
+
+  return (
+    <div className="mt-7 grid gap-4 xl:grid-cols-2">
+      <AnalysisCard title="Rival Role Delta" subtitle={roleDelta.opponentLabel}>
+        <p className="text-sm leading-6 text-slate-300">{roleDelta.explanation}</p>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <MiniAnalysisFact label="Final gold" value={formatSigned(finalDelta.goldEarned)} />
+          <MiniAnalysisFact label="Final CS" value={formatSigned(finalDelta.totalCs)} />
+          <MiniAnalysisFact label="CS/min" value={formatSigned(finalDelta.csPerMinute)} />
+          <MiniAnalysisFact label="Vision" value={formatSigned(finalDelta.visionScore)} />
+        </div>
+        <CompactList
+          items={roleDelta.checkpoints.slice(0, 4).map(
+            (checkpoint) =>
+              `${checkpoint.minute}m: ${formatSigned(checkpoint.totalGoldDelta)} gold, ${formatSigned(checkpoint.totalCsDelta)} CS, ${formatSigned(checkpoint.levelDelta)} level`,
+          )}
+          emptyText="Checkpoint role deltas were not available."
+        />
+      </AnalysisCard>
+
+      <AnalysisCard title="Death Cost Profile" subtitle={`${analysis.deathCostProfile.totalDeaths} total death(s)`}>
+        <div className="grid gap-2 sm:grid-cols-3">
+          <MiniAnalysisFact label="High cost" value={analysis.deathCostProfile.highCostDeaths} />
+          <MiniAnalysisFact label="Neutral/trade" value={analysis.deathCostProfile.neutralOrTradeDeaths} />
+          <MiniAnalysisFact label="Low confidence" value={analysis.deathCostProfile.lowConfidenceDeaths} />
+        </div>
+        <CompactList
+          items={analysis.deathCostProfile.categories.map((category) => `${formatCategoryLabel(category.label)}: ${category.count}`)}
+          emptyText="No death categories detected."
+        />
+        <p className="mt-3 text-sm leading-6 text-lab-muted">{analysis.deathCostProfile.recommendation}</p>
+      </AnalysisCard>
+
+      <AnalysisCard title="Objective Conversion" subtitle="Objective to map outcome signals">
+        <CompactList
+          items={analysis.objectiveConversion.objectivesByTeam.map(
+            (item) => `${item.teamSide}: ${item.count} ${item.objective}`,
+          )}
+          emptyText="No objective windows were detected."
+        />
+        <p className="mt-3 text-sm leading-6 text-slate-300">{analysis.objectiveConversion.explanation}</p>
+        <div className="mt-3 grid gap-2">
+          <MiniAnalysisFact label="Best conversion" value={analysis.objectiveConversion.bestConversion} />
+          <MiniAnalysisFact label="Worst conversion" value={analysis.objectiveConversion.worstConversion} />
+        </div>
+      </AnalysisCard>
+
+      <AnalysisCard title="Power Spike Timing" subtitle="Raw item purchase timing">
+        <p className="text-sm leading-6 text-slate-300">{analysis.powerSpikeTiming.explanation}</p>
+        <CompactList
+          items={analysis.powerSpikeTiming.purchaseWindows.map((window) => `${window.title}: ${window.summary}`)}
+          emptyText="No objective-adjacent purchase timing signals detected."
+        />
+      </AnalysisCard>
+
+      <AnalysisCard title="Teamfight Profile" subtitle={`${analysis.teamfightProfile.keyFights.length} key fight cluster(s)`}>
+        <p className="text-sm leading-6 text-slate-300">{analysis.teamfightProfile.explanation}</p>
+        <CompactList
+          items={analysis.teamfightProfile.keyFights.slice(0, 4).map(
+            (fight) =>
+              `${fight.startTime}-${fight.endTime}: ${fight.blueKills}-${fight.redKills}, ${fight.conversionResult}. Player ${fight.playerParticipated ? "participated" : "not detected"}${fight.playerDied ? `, died ${fight.playerDeathTiming}` : ""}.`,
+          )}
+          emptyText="No 2+ kill clusters were detected."
+        />
+      </AnalysisCard>
+
+      <AnalysisCard title="Map Impact Summary" subtitle="Largest API-confirmed map outcomes">
+        <CompactList
+          items={[
+            `Main map gain: ${analysis.mapImpactSummary.mainMapGain}`,
+            `Main map loss: ${analysis.mapImpactSummary.mainMapLoss}`,
+            `Objective swing: ${analysis.mapImpactSummary.mainObjectiveSwing}`,
+            `Structure swing: ${analysis.mapImpactSummary.mainStructureSwing}`,
+          ]}
+          emptyText="No map impact summary available."
+        />
+      </AnalysisCard>
+    </div>
+  );
+}
+
+function AnalysisCard({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-md border border-white/[0.07] bg-black/20 p-4">
+      <p className="label-muted">{title}</p>
+      <h6 className="mt-2 text-lg font-semibold text-lab-text">{subtitle}</h6>
+      <div className="mt-4">{children}</div>
+    </section>
+  );
+}
+
+function MiniAnalysisFact({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-md border border-white/[0.06] bg-lab-panel2/50 p-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-lab-muted">{label}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-200">{value}</p>
+    </div>
+  );
+}
+
+function CompactList({ items, emptyText }: { items: string[]; emptyText: string }) {
+  return items.length > 0 ? (
+    <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-300">
+      {items.slice(0, 6).map((item) => (
+        <li key={item} className="border-l border-lab-cyan/25 pl-3">
+          {item}
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p className="mt-4 text-sm leading-6 text-lab-muted">{emptyText}</p>
   );
 }
 
@@ -641,6 +789,13 @@ function TelemetryChartsSection({ report }: { report: PreliminaryRiftLabReport }
           dataKey="totalCs"
           emptyText="Not enough timeline data to render this chart."
         />
+        <TelemetryLineChart
+          title="Rival role gold delta"
+          subtitle="Gold delta against the direct role opponent at timeline checkpoints."
+          data={report.telemetryCharts.rivalRoleDelta}
+          dataKey="goldDelta"
+          emptyText="Direct role checkpoint data was not available."
+        />
         <TelemetryBarChart
           title="Metric scores"
           subtitle="Value Lost is a cost/risk signal, not a positive contribution score."
@@ -656,6 +811,14 @@ function TelemetryChartsSection({ report }: { report: PreliminaryRiftLabReport }
           dataKey="value"
           emptyText="No event count data available."
           color="#F6C85F"
+        />
+        <TelemetryBarChart
+          title="Teamfight conversions"
+          subtitle="Fight clusters followed by objective or structure outcomes."
+          data={report.telemetryCharts.teamfightConversionCounts}
+          dataKey="value"
+          emptyText="No teamfight conversion counts available."
+          color="#7DD3FC"
         />
         <TelemetryLineChart
           title="Gold/min checkpoints"
@@ -774,7 +937,7 @@ function DetectedWindowList({ report }: { report: PreliminaryRiftLabReport }) {
   const windows = [
     ...report.signals.deathBeforeObjective.map((signal) => ({
       title: "Death before objective",
-      detail: `${signal.deathTimestamp} death preceded ${signal.objectiveWindowLabel} by ${signal.secondsBeforeObjective}s. Killer team: ${signal.killerTeam}.`,
+      detail: `${signal.deathTimestamp} death preceded ${signal.objectiveWindowLabel} by ${signal.secondsBeforeObjective}s. Objective secured by ${signal.killerTeam}.`,
       severity: signal.severity,
     })),
     ...report.signals.deathAfterObjective.map((signal) => ({
@@ -844,14 +1007,34 @@ function getStructureLossWindowDetail(
   return `${baseDetail} Low-confidence structure-loss association; causal confidence ${signal.causalConfidence}.`;
 }
 
-function TimelineDiagnosticsPanel({ diagnostics }: { diagnostics: TimelineDiagnostics }) {
+function formatSigned(value: number): string {
+  return value > 0 ? `+${value}` : `${value}`;
+}
+
+function formatCategoryLabel(label: string): string {
+  return label
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function TimelineDiagnosticsPanel({
+  diagnostics,
+  participants,
+}: {
+  diagnostics: TimelineDiagnostics;
+  participants: NonNullable<Parameters<typeof formatParticipantIdForUser>[1]>;
+}) {
   return (
     <section className="mt-7 rounded-md border border-white/[0.07] bg-lab-panel/80 p-5">
       <div>
         <p className="eyebrow">Timeline Diagnostics</p>
         <h5 className="mt-2 text-xl font-semibold text-lab-text">Raw Match-V5 timeline signals</h5>
         <div className="mt-3 flex flex-wrap gap-2 text-sm text-lab-muted">
-          <span className="quiet-surface px-3 py-2">Participant ID {diagnostics.participantId}</span>
+          <span className="quiet-surface px-3 py-2">
+            Participant {formatParticipantIdForUser(diagnostics.participantId, participants)}
+          </span>
           <span className="quiet-surface px-3 py-2">Frames {diagnostics.frameCount}</span>
           <span className="quiet-surface px-3 py-2">Events parsed {diagnostics.parsedEventCount}</span>
         </div>
@@ -862,11 +1045,11 @@ function TimelineDiagnosticsPanel({ diagnostics }: { diagnostics: TimelineDiagno
           {diagnostics.playerDeaths.map((event, index) => (
             <DiagnosticRow key={`${event.timestamp}-${index}`}>
               <span>{event.timestamp}</span>
-              <span>Killer: {event.killerParticipantId ?? "Unknown"}</span>
+              <span>Killer: {formatParticipantIdForUser(event.killerParticipantId, participants)}</span>
               <span>
                 Assists:{" "}
                 {event.assistingParticipantIds.length > 0
-                  ? event.assistingParticipantIds.join(", ")
+                  ? formatParticipantIdsForUser(event.assistingParticipantIds, participants)
                   : "None"}
               </span>
             </DiagnosticRow>
@@ -881,7 +1064,7 @@ function TimelineDiagnosticsPanel({ diagnostics }: { diagnostics: TimelineDiagno
                 {event.monsterType}
                 {event.monsterSubType ? ` (${event.monsterSubType})` : ""}
               </span>
-              <span>Killer team: {event.killerTeam}</span>
+              <span>Objective secured by {event.killerTeam}</span>
             </DiagnosticRow>
           ))}
         </DiagnosticList>

@@ -1,0 +1,17 @@
+{
+  "createdAt": "2026-04-30T17:41:10.372Z",
+  "configPath": "local-processor/config/local-processor.example.json",
+  "mode": "manual_safe",
+  "region": "LAS",
+  "replayDirectory": "",
+  "outputDirectory": "local-processor/output",
+  "replayCandidates": [],
+  "manualSafeInstructions": [
+    "Open the replay manually in the League client.",
+    "Future versions will capture frames from the replay window.",
+    "This scaffold does not automate the client, parse .rofl files, read memory, inject code, or create overlays."
+  ],
+  "warnings": [
+    "No replayDirectory configured; skipping .rofl discovery."
+  ]
+}

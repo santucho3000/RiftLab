@@ -1,0 +1,19 @@
+{
+  "replayDirectory": "",
+  "outputDirectory": "local-processor/output",
+  "region": "LAS",
+  "mode": "manual_safe",
+  "capture": {
+    "targetFps": 1,
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "minimapBoundingBox": {
+      "x": 1668,
+      "y": 792,
+      "width": 252,
+      "height": 252
+    }
+  }
+}

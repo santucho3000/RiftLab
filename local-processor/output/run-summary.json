@@ -1,17 +1,92 @@
 {
-  "createdAt": "2026-04-30T17:41:10.372Z",
+  "createdAt": "2026-04-30T21:12:06.262Z",
   "configPath": "local-processor/config/local-processor.example.json",
   "mode": "manual_safe",
   "region": "LAS",
-  "replayDirectory": "",
+  "configuredReplayDirectory": "",
+  "discoveredReplayDirectories": [],
+  "selectedReplayDirectory": "C:\\Users\\Administrator\\Documents\\League of Legends\\Replays",
+  "selectedReplay": {
+    "replayPath": "C:\\Users\\Administrator\\Documents\\League of Legends\\Replays\\LA2-1557836680.rofl",
+    "replayFileName": "LA2-1557836680.rofl",
+    "replaySizeBytes": 21408972,
+    "replayModifiedAt": "2026-04-30T19:41:17.086Z",
+    "selectionMode": "explicit"
+  },
+  "matchIdentity": {
+    "matchId": "LA2_0000000000",
+    "gameId": "0000000000",
+    "resolutionStatus": "provided_explicitly",
+    "source": {
+      "type": "external_api_context",
+      "authority": "riot_api",
+      "providedBy": "api_match_context_file",
+      "verifiedByLocalProcessor": false
+    },
+    "notes": [
+      "Match identity was provided by an API match context file.",
+      "The Local Processor does not call Riot API or verify this identity yet.",
+      "Riot API remains the source of truth for official match facts."
+    ]
+  },
+  "matchIdentityResolutionStatus": "provided_explicitly",
+  "matchIdentitySourceType": "external_api_context",
+  "matchIdentityAuthority": "riot_api",
+  "matchIdentityProvidedBy": "api_match_context_file",
+  "matchIdentityVerifiedByLocalProcessor": false,
+  "apiMatchContextProvided": true,
+  "apiMatchContextPath": "C:\\Users\\Administrator\\Documents\\Codex\\2026-04-27\\files-mentioned-by-the-user-idea\\local-processor\\fixtures\\api-match-context.mismatch.sample.json",
+  "apiMatchContextSchemaVersion": "api-match-context.v0.1",
+  "apiMatchContextPlayerContextAvailable": true,
+  "matchContextConsistency": {
+    "checked": true,
+    "status": "mismatch",
+    "apiMatchId": "LA2_0000000000",
+    "filenameHintPossibleMatchId": "LA2_1557836680",
+    "severity": "warning",
+    "notes": [
+      "Replay filename hint does not match the provided API match context.",
+      "This may indicate the selected replay and API context refer to different matches.",
+      "This is a local consistency check only and does not call Riot API."
+    ]
+  },
+  "matchContextConsistencyStatus": "mismatch",
+  "matchContextConsistencySeverity": "warning",
+  "filenameHint": {
+    "available": true,
+    "platformId": "LA2",
+    "gameId": "1557836680",
+    "possibleMatchId": "LA2_1557836680",
+    "confidence": "low",
+    "status": "filename_hint_only",
+    "notes": [
+      "This was inferred from the replay filename only.",
+      "This is not verified against Riot API.",
+      "This must not replace explicit match identity or official Riot API facts."
+    ]
+  },
+  "filenameHintAvailable": true,
+  "filenameHintStatus": "filename_hint_only",
+  "filenameHintPossibleMatchId": "LA2_1557836680",
+  "replayInputManifestPath": "local-processor/output/replay-input-manifest.json",
+  "vodEvidencePlaceholderPath": "local-processor/output/vod-evidence-placeholder.json",
+  "vodEvidencePlaceholderGeneratedFromManifest": true,
+  "replayCount": 1,
   "outputDirectory": "local-processor/output",
-  "replayCandidates": [],
+  "replayCandidates": [
+    {
+      "filename": "LA2-1557836680.rofl",
+      "fullPath": "C:\\Users\\Administrator\\Documents\\League of Legends\\Replays\\LA2-1557836680.rofl",
+      "sizeBytes": 21408972,
+      "modifiedAt": "2026-04-30T19:41:17.086Z"
+    }
+  ],
   "manualSafeInstructions": [
     "Open the replay manually in the League client.",
     "Future versions will capture frames from the replay window.",
     "This scaffold does not automate the client, parse .rofl files, read memory, inject code, or create overlays."
   ],
   "warnings": [
-    "No replayDirectory configured; skipping .rofl discovery."
+    "API match context does not match filename hint. Check that the selected replay belongs to the provided match context."
   ]
 }

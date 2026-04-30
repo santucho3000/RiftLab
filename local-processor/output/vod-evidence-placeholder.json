@@ -1,54 +1,100 @@
 {
-  "schemaVersion": "vod-evidence.v0.1",
+  "schemaVersion": "vod-evidence.stub.v0.1",
+  "createdAt": "2026-04-30T21:12:06.262Z",
   "source": {
-    "type": "manual_annotation",
-    "toolName": "riftlab-local-processor-placeholder",
-    "toolVersion": "0.1.0",
-    "modelVersion": "none",
-    "inputKind": "annotation",
-    "inputHash": "sha256:placeholder-no-real-evidence",
-    "createdAt": "2026-04-30T17:41:10.370Z"
-  },
-  "match": {
+    "type": "rofl",
+    "mode": "manual_safe",
     "region": "LAS",
-    "timeAlignment": {
-      "method": "unknown",
-      "videoStartOffsetMs": 0,
-      "confidence": 0
+    "replay": {
+      "replayPath": "C:\\Users\\Administrator\\Documents\\League of Legends\\Replays\\LA2-1557836680.rofl",
+      "replayFileName": "LA2-1557836680.rofl",
+      "replaySizeBytes": 21408972,
+      "replayModifiedAt": "2026-04-30T19:41:17.086Z",
+      "selectionMode": "explicit"
+    },
+    "matchIdentity": {
+      "matchId": "LA2_0000000000",
+      "gameId": "0000000000",
+      "resolutionStatus": "provided_explicitly",
+      "source": {
+        "type": "external_api_context",
+        "authority": "riot_api",
+        "providedBy": "api_match_context_file",
+        "verifiedByLocalProcessor": false
+      },
+      "notes": [
+        "Match identity was provided by an API match context file.",
+        "The Local Processor does not call Riot API or verify this identity yet.",
+        "Riot API remains the source of truth for official match facts."
+      ]
+    },
+    "filenameHint": {
+      "available": true,
+      "platformId": "LA2",
+      "gameId": "1557836680",
+      "possibleMatchId": "LA2_1557836680",
+      "confidence": "low",
+      "status": "filename_hint_only",
+      "notes": [
+        "This was inferred from the replay filename only.",
+        "This is not verified against Riot API.",
+        "This must not replace explicit match identity or official Riot API facts."
+      ]
+    },
+    "apiMatchContext": {
+      "provided": true,
+      "path": "C:\\Users\\Administrator\\Documents\\Codex\\2026-04-27\\files-mentioned-by-the-user-idea\\local-processor\\fixtures\\api-match-context.mismatch.sample.json",
+      "schemaVersion": "api-match-context.v0.1",
+      "source": {
+        "type": "riot_api",
+        "generatedBy": "riftlab_web_app",
+        "verifiedByLocalProcessor": false
+      },
+      "playerContext": {
+        "puuid": null,
+        "riotId": {
+          "gameName": null,
+          "tagLine": null
+        },
+        "participantId": null,
+        "championName": null
+      }
+    },
+    "matchContextConsistency": {
+      "checked": true,
+      "status": "mismatch",
+      "apiMatchId": "LA2_0000000000",
+      "filenameHintPossibleMatchId": "LA2_1557836680",
+      "severity": "warning",
+      "notes": [
+        "Replay filename hint does not match the provided API match context.",
+        "This may indicate the selected replay and API context refer to different matches.",
+        "This is a local consistency check only and does not call Riot API."
+      ]
     }
   },
-  "coordinateSystem": {
-    "type": "summoners_rift_normalized",
-    "xRange": [
-      0,
-      1
-    ],
-    "yRange": [
-      0,
-      1
-    ],
-    "origin": "blue_bottom_left",
-    "notes": "Placeholder only. No replay frames or minimap evidence have been processed."
+  "analysisStatus": {
+    "stage": "replay_selected_no_visual_analysis",
+    "roflParsingEnabled": false,
+    "frameCaptureEnabled": false,
+    "minimapAnalysisEnabled": false,
+    "officialApiReplacement": false
   },
-  "participants": [],
-  "championTracks": [],
-  "wardSamples": [],
-  "objectivePresenceSignals": [],
-  "rotationSignals": [],
-  "teamSpacingSignals": [],
-  "zoneControlSignals": [],
-  "fightSetupSignals": [],
-  "waveStateSignals": [],
-  "ocrSignals": [],
-  "quality": {
-    "overallConfidence": 0,
-    "unsupportedReasons": [
-      "local_processor_placeholder_only"
-    ],
-    "warnings": [
-      "This is not real VOD evidence.",
-      "No replay was opened, parsed, captured, or analyzed.",
-      "Do not use this file for scoring."
+  "evidence": {
+    "objectiveWindows": [],
+    "minimapObservations": [],
+    "spatialContext": [],
+    "confidenceNotes": [
+      "Replay selected only. No ROFL parsing, frame capture, minimap analysis, or spatial evidence has been produced.",
+      "This stub must not replace Riot API facts or affect scoring."
     ]
+  },
+  "safety": {
+    "doesNotLaunchLeague": true,
+    "doesNotAutomateClient": true,
+    "doesNotReadMemory": true,
+    "doesNotInjectCode": true,
+    "doesNotCreateOverlay": true,
+    "doesNotBypassAnticheat": true
   }
 }

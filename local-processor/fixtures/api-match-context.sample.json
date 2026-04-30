@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "api-match-context.v0.1",
+  "createdAt": "2026-04-30T21:00:00.000Z",
+  "source": {
+    "type": "riot_api",
+    "generatedBy": "riftlab_web_app",
+    "verifiedByLocalProcessor": false
+  },
+  "region": "LAS",
+  "matchIdentity": {
+    "matchId": "LA2_1557836680",
+    "gameId": "1557836680",
+    "platformId": "LA2"
+  },
+  "playerContext": {
+    "puuid": null,
+    "riotId": {
+      "gameName": null,
+      "tagLine": null
+    },
+    "participantId": null,
+    "championName": null
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "fixed-capture-preset.v0.1",
+  "createdAt": "2026-05-01T19:04:59.461Z",
+  "mode": "manual_safe",
+  "selectedReplay": {
+    "replayPath": "C:\\Users\\Administrator\\Documents\\League of Legends\\Replays\\LA2-1591777797.rofl",
+    "replayFileName": "LA2-1591777797.rofl",
+    "replaySizeBytes": 4279018,
+    "replayModifiedAt": "2026-05-01T16:56:04.739Z",
+    "selectionMode": "auto-discovered"
+  },
+  "matchIdentity": {
+    "matchId": null,
+    "gameId": null,
+    "resolutionStatus": "unresolved",
+    "source": {
+      "type": "none",
+      "authority": null,
+      "providedBy": null,
+      "verifiedByLocalProcessor": false
+    },
+    "notes": [
+      "The Local Processor does not parse .rofl metadata yet.",
+      "Match identity is not guessed.",
+      "Future versions may link replay metadata to Riot API match data."
+    ]
+  },
+  "capturePreset": {
+    "enabledNow": false,
+    "presetName": "default_1920x1080_observer_replay",
+    "expectedWindowResolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "captureRegion": {
+      "type": "full_window_future",
+      "x": 0,
+      "y": 0,
+      "width": 1920,
+      "height": 1080
+    },
+    "minimapCropPreset": {
+      "enabledNow": false,
+      "coordinateSystem": "window_pixels",
+      "expectedResolution": {
+        "width": 1920,
+        "height": 1080
+      },
+      "crop": {
+        "x": 1600,
+        "y": 780,
+        "width": 320,
+        "height": 300
+      },
+      "normalizedOutput": {
+        "width": 512,
+        "height": 512
+      },
+      "notes": [
+        "Initial placeholder crop for future calibration.",
+        "This must be validated against real replay screenshots before analysis.",
+        "No frames are captured in this version."
+      ]
+    }
+  },
+  "futureRequirements": {
+    "requiresManualReplayOpen": true,
+    "requiresPassiveWindowDetection": true,
+    "requiresFrameCaptureImplementation": true,
+    "requiresMinimapCropValidation": true
+  },
+  "safety": {
+    "doesNotLaunchLeague": true,
+    "doesNotAutomateClient": true,
+    "doesNotClickClient": true,
+    "doesNotReadMemory": true,
+    "doesNotInjectCode": true,
+    "doesNotCreateOverlay": true,
+    "doesNotBypassAnticheat": true,
+    "doesNotCaptureFramesYet": true
+  }
+}

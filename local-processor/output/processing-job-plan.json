@@ -1,11 +1,11 @@
 {
-  "schemaVersion": "vod-evidence.stub.v0.1",
-  "createdAt": "2026-05-01T19:05:11.680Z",
-  "source": {
-    "type": "rofl",
-    "mode": "manual_safe",
-    "region": "LAS",
-    "replay": {
+  "schemaVersion": "processing-job-plan.v0.1",
+  "createdAt": "2026-05-01T19:04:59.460Z",
+  "mode": "manual_safe",
+  "region": "LAS",
+  "input": {
+    "replayInputManifestPath": "local-processor/output/replay-input-manifest.json",
+    "selectedReplay": {
       "replayPath": "C:\\Users\\Administrator\\Documents\\League of Legends\\Replays\\LA2-1591777797.rofl",
       "replayFileName": "LA2-1591777797.rofl",
       "replaySizeBytes": 4279018,
@@ -52,22 +52,48 @@
       ]
     }
   },
-  "analysisStatus": {
-    "stage": "replay_selected_no_visual_analysis",
-    "roflParsingEnabled": false,
-    "frameCaptureEnabled": false,
-    "minimapAnalysisEnabled": false,
-    "officialApiReplacement": false
-  },
-  "evidence": {
-    "objectiveWindows": [],
-    "minimapObservations": [],
-    "spatialContext": [],
-    "confidenceNotes": [
-      "Replay selected only. No ROFL parsing, frame capture, minimap analysis, or spatial evidence has been produced.",
-      "This stub must not replace Riot API facts or affect scoring."
-    ]
-  },
+  "stages": [
+    {
+      "id": "replay_selected",
+      "status": "completed",
+      "description": "Replay file was selected and metadata was recorded."
+    },
+    {
+      "id": "match_context_linked",
+      "status": "pending",
+      "description": "Official Riot API match context was linked if provided."
+    },
+    {
+      "id": "manual_replay_open",
+      "status": "manual_required",
+      "description": "User must open the replay manually in the League client."
+    },
+    {
+      "id": "replay_window_detection",
+      "status": "future",
+      "description": "Future stage for detecting the replay window without automating the client."
+    },
+    {
+      "id": "frame_capture",
+      "status": "future",
+      "description": "Future stage for safe offline frame capture after manual replay open."
+    },
+    {
+      "id": "minimap_extraction",
+      "status": "future",
+      "description": "Future stage for extracting minimap frames."
+    },
+    {
+      "id": "spatial_evidence_generation",
+      "status": "future",
+      "description": "Future stage for generating spatial/minimap evidence."
+    },
+    {
+      "id": "vod_evidence_export",
+      "status": "future",
+      "description": "Future stage for exporting real vod-evidence JSON."
+    }
+  ],
   "safety": {
     "doesNotLaunchLeague": true,
     "doesNotAutomateClient": true,

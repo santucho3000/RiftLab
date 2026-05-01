@@ -1,0 +1,425 @@
+{
+  "schemaVersion": "replay-endpoint-contracts.v0.1",
+  "createdAt": "2026-05-01T19:04:59.447Z",
+  "baseUrl": "https://127.0.0.1:2999",
+  "sourceSwaggerPath": "/swagger/v2/swagger.json",
+  "replayEndpointsDiscovered": true,
+  "endpoints": [
+    {
+      "path": "/replay/banners",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "operations": [
+        {
+          "method": "GET",
+          "operationId": "GetReplayBanners",
+          "summary": "Returns information about the current state of Esports Banners (DEPRECATED)",
+          "parameters": [],
+          "responseStatusCodes": [
+            "200"
+          ]
+        },
+        {
+          "method": "PUT",
+          "operationId": "PutReplayBanners",
+          "summary": "Sets Esport Banner configuration (DEPRECATED)",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "banners",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Banners"
+              }
+            }
+          ],
+          "responseStatusCodes": [
+            "200"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/replay/game",
+      "methods": [
+        "GET"
+      ],
+      "operations": [
+        {
+          "method": "GET",
+          "operationId": "GetReplayGame",
+          "summary": "Information about the game client process.",
+          "parameters": [],
+          "responseStatusCodes": [
+            "200"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/replay/particles",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operations": [
+        {
+          "method": "GET",
+          "operationId": "GetReplayParticles",
+          "summary": "Returns map of particle name to current visibility status.",
+          "parameters": [],
+          "responseStatusCodes": [
+            "200"
+          ]
+        },
+        {
+          "method": "POST",
+          "operationId": "PostReplayParticles",
+          "summary": "Takes a map of particle name to visibility and applies it to the currently rendering particles.",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "particles",
+              "required": true,
+              "schema": {
+                "additionalProperties": true,
+                "type": "object"
+              }
+            }
+          ],
+          "responseStatusCodes": [
+            "200"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/replay/playback",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operations": [
+        {
+          "method": "GET",
+          "operationId": "GetReplayPlayback",
+          "summary": "Returns the current replay playback state such as pause and current time.",
+          "parameters": [],
+          "responseStatusCodes": [
+            "200"
+          ]
+        },
+        {
+          "method": "POST",
+          "operationId": "PostReplayPlayback",
+          "summary": "Allows modifying the playback state such as play / pause and the game time to seek to. All values are optional.",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "playback",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Playback"
+              }
+            }
+          ],
+          "responseStatusCodes": [
+            "200"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/replay/recording",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operations": [
+        {
+          "method": "GET",
+          "operationId": "GetReplayRecording",
+          "summary": "Returns the current status of video recording. Poll this resource for progress on the output.",
+          "parameters": [],
+          "responseStatusCodes": [
+            "200"
+          ]
+        },
+        {
+          "method": "POST",
+          "operationId": "PostReplayRecording",
+          "summary": "Post to begin a recording specifying the codec and output filepath. Subsequent GET requests to this resource will update the status.",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "recording",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Recording"
+              }
+            }
+          ],
+          "responseStatusCodes": [
+            "200"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/replay/render",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operations": [
+        {
+          "method": "GET",
+          "operationId": "GetReplayRender",
+          "summary": "Returns the current render properties.",
+          "parameters": [],
+          "responseStatusCodes": [
+            "200"
+          ]
+        },
+        {
+          "method": "POST",
+          "operationId": "PostReplayRender",
+          "summary": "Allows modifying the current render properties. All values are optional.",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "render",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Render"
+              }
+            }
+          ],
+          "responseStatusCodes": [
+            "200"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/replay/sequence",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operations": [
+        {
+          "method": "GET",
+          "operationId": "GetReplaySequence",
+          "summary": "Returns the sequence currently being applied.",
+          "parameters": [],
+          "responseStatusCodes": [
+            "200"
+          ]
+        },
+        {
+          "method": "POST",
+          "operationId": "PostReplaySequence",
+          "summary": "Post to apply a sequence of keyframes that the replay should play. Post an empty object to remove the sequence.",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "sequence",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Sequence"
+              }
+            }
+          ],
+          "responseStatusCodes": [
+            "200"
+          ]
+        }
+      ]
+    }
+  ],
+  "importantEndpoints": {
+    "render": {
+      "path": "/replay/render",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operations": [
+        {
+          "method": "GET",
+          "operationId": "GetReplayRender",
+          "summary": "Returns the current render properties.",
+          "parameters": [],
+          "responseStatusCodes": [
+            "200"
+          ]
+        },
+        {
+          "method": "POST",
+          "operationId": "PostReplayRender",
+          "summary": "Allows modifying the current render properties. All values are optional.",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "render",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Render"
+              }
+            }
+          ],
+          "responseStatusCodes": [
+            "200"
+          ]
+        }
+      ]
+    },
+    "playback": {
+      "path": "/replay/playback",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operations": [
+        {
+          "method": "GET",
+          "operationId": "GetReplayPlayback",
+          "summary": "Returns the current replay playback state such as pause and current time.",
+          "parameters": [],
+          "responseStatusCodes": [
+            "200"
+          ]
+        },
+        {
+          "method": "POST",
+          "operationId": "PostReplayPlayback",
+          "summary": "Allows modifying the playback state such as play / pause and the game time to seek to. All values are optional.",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "playback",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Playback"
+              }
+            }
+          ],
+          "responseStatusCodes": [
+            "200"
+          ]
+        }
+      ]
+    },
+    "game": {
+      "path": "/replay/game",
+      "methods": [
+        "GET"
+      ],
+      "operations": [
+        {
+          "method": "GET",
+          "operationId": "GetReplayGame",
+          "summary": "Information about the game client process.",
+          "parameters": [],
+          "responseStatusCodes": [
+            "200"
+          ]
+        }
+      ]
+    },
+    "sequence": {
+      "path": "/replay/sequence",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operations": [
+        {
+          "method": "GET",
+          "operationId": "GetReplaySequence",
+          "summary": "Returns the sequence currently being applied.",
+          "parameters": [],
+          "responseStatusCodes": [
+            "200"
+          ]
+        },
+        {
+          "method": "POST",
+          "operationId": "PostReplaySequence",
+          "summary": "Post to apply a sequence of keyframes that the replay should play. Post an empty object to remove the sequence.",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "sequence",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Sequence"
+              }
+            }
+          ],
+          "responseStatusCodes": [
+            "200"
+          ]
+        }
+      ]
+    },
+    "recording": {
+      "path": "/replay/recording",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "operations": [
+        {
+          "method": "GET",
+          "operationId": "GetReplayRecording",
+          "summary": "Returns the current status of video recording. Poll this resource for progress on the output.",
+          "parameters": [],
+          "responseStatusCodes": [
+            "200"
+          ]
+        },
+        {
+          "method": "POST",
+          "operationId": "PostReplayRecording",
+          "summary": "Post to begin a recording specifying the codec and output filepath. Subsequent GET requests to this resource will update the status.",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "recording",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Recording"
+              }
+            }
+          ],
+          "responseStatusCodes": [
+            "200"
+          ]
+        }
+      ]
+    }
+  },
+  "interpretation": {
+    "status": "contracts_extracted",
+    "notes": [
+      "This report only extracts endpoint contracts from Swagger.",
+      "It does not call render/playback endpoints.",
+      "Future control steps must be implemented separately."
+    ]
+  },
+  "safety": {
+    "swaggerReadOnly": true,
+    "doesNotCallReplayEndpoints": true,
+    "doesNotPost": true,
+    "doesNotChangeRender": true,
+    "doesNotChangePlayback": true,
+    "doesNotSeek": true,
+    "doesNotCaptureFrames": true,
+    "doesNotLaunchLeague": true,
+    "doesNotOpenReplay": true
+  }
+}

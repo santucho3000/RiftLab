@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "replay-playback-window-apply-report.v0.1",
+  "createdAt": "2026-05-01T19:05:11.677Z",
+  "mode": "replay_api_assisted",
+  "applied": true,
+  "previousPlayback": {
+    "time": 1.458609938621521,
+    "speed": 1,
+    "paused": true,
+    "seeking": false
+  },
+  "requestedWindow": {
+    "startTime": 30,
+    "duration": 5,
+    "endTime": 35,
+    "requestedSpeed": 1,
+    "sampleRateFps": 1
+  },
+  "applyRequest": {
+    "time": 30,
+    "speed": 1,
+    "paused": false
+  },
+  "afterApplyPlayback": {
+    "time": 30.251243591308594,
+    "speed": 1,
+    "paused": false,
+    "seeking": false
+  },
+  "restore": {
+    "requested": true,
+    "attempted": true,
+    "previousStateRestoreRequest": {
+      "time": 1.458609938621521,
+      "speed": 1,
+      "paused": true
+    },
+    "afterRestorePlayback": {
+      "time": 1.458609938621521,
+      "speed": 1,
+      "paused": true,
+      "seeking": false
+    }
+  },
+  "interpretation": {
+    "status": "applied_and_restored",
+    "notes": [
+      "Replay playback window was applied and the previous playback state was restored.",
+      "No render changes were performed."
+    ]
+  },
+  "safety": {
+    "doesNotCaptureFrames": true,
+    "doesNotTouchRender": true,
+    "doesNotLaunchLeague": true,
+    "doesNotOpenReplay": true,
+    "doesNotAutomateKeyboardOrMouse": true,
+    "doesNotParseRofl": true
+  }
+}

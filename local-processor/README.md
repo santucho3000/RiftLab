@@ -180,6 +180,119 @@ v0.9 supports `--api-match-context <path-to-json>`. This file represents officia
 
 v0.10 adds a local consistency check when both API match context and filename hint are available. It compares `apiMatchContext.matchIdentity.matchId` with `filenameHint.possibleMatchId`. A match is informational only; a mismatch warns that the replay and API context may not belong together. This is not Riot API verification.
 
+v0.13 writes `local-processor/output/processing-job-plan.json` after a replay input manifest is created. The plan lists future stages but does not execute them. All replay opening remains manual, and future capture/minimap stages are marked as `future`.
+
+v0.14 writes `local-processor/output/manual-replay-open-checklist.json` after the processing job plan. Every step is marked `manual_required`; the Local Processor still does not launch, click, or automate the League client.
+
+v0.15 writes `local-processor/output/replay-window-readiness.json`. This describes future passive window lookup requirements, but `enabledNow` and frame capture remain `false`.
+
+v0.16 writes `local-processor/output/fixed-capture-preset.json`. This defines a future fixed 1920x1080 replay capture preset and minimap crop placeholder, but both capture and minimap crop are disabled now.
+
+v0.17 writes `local-processor/output/calibration-screenshot-contract.json`. This defines how a future manually supplied replay screenshot could be accepted for minimap crop calibration, but screenshot capture and validation are disabled now.
+
+v0.18 adds optional manual screenshot validation:
+
+```bash
+npx tsx local-processor/src/index.ts --replay "C:/path/to/LA2-1557836680.rofl" --calibration-screenshot "C:/path/to/manual-replay-screenshot.png"
+```
+
+The screenshot must be provided manually by the user. The Local Processor does not capture screenshots, detect windows, click the client, or perform visual minimap/champion analysis. It only reads basic image dimensions from `png`, `jpg`, or `jpeg` files and checks the fixed minimap crop preset against the image bounds.
+
+If validation runs, it writes:
+
+```text
+local-processor/output/calibration-report.json
+```
+
+The report status is:
+
+- `pass` when the screenshot is readable, matches the expected 1920x1080 preset, and the minimap crop is within bounds
+- `warning` when the image is readable and the crop is valid, but resolution differs from the preset
+- `fail` when image dimensions cannot be read or the crop is outside image bounds
+
+If `--calibration-screenshot` is not provided, no calibration report is written.
+
+v0.19 exports minimap crop previews when `--calibration-screenshot` is provided and calibration status is `pass` or `warning`:
+
+```text
+local-processor/output/minimap-crop.png
+local-processor/output/minimap-normalized.png
+local-processor/output/minimap-crop-metadata.json
+```
+
+These images are derived only from the manually provided screenshot path. The processor still does not capture screenshots, capture frames, detect windows, detect champions, detect wards, detect objectives, or analyze minimap content.
+
+v0.20 also generates five automatic minimap crop candidates from likely bottom-right minimap regions:
+
+```text
+local-processor/output/minimap-candidates/candidate-01.png
+local-processor/output/minimap-candidates/candidate-02.png
+local-processor/output/minimap-candidates/candidate-03.png
+local-processor/output/minimap-candidates/candidate-04.png
+local-processor/output/minimap-candidates/candidate-05.png
+local-processor/output/minimap-candidates/candidates-metadata.json
+```
+
+These candidates are for developer inspection only. The user does not need to enter crop coordinates. No automatic candidate selection or minimap analysis is performed yet.
+
+v0.22 adds an opt-in Replay API availability probe:
+
+```bash
+npx tsx local-processor/src/index.ts --probe-replay-api
+```
+
+This probe only performs short local `GET` requests against replay-scoped endpoints at `https://127.0.0.1:2999`. It does not launch League, does not open a replay, does not change playback or render settings, does not seek, and does not capture frames. It only checks whether a replay API appears available after the user has opened a replay manually.
+
+If requested, it writes:
+
+```text
+local-processor/output/replay-api-status.json
+```
+
+v0.23 extends the probe with Swagger-based endpoint discovery:
+
+```text
+local-processor/output/replay-api-endpoints.json
+```
+
+This report fetches `/swagger/v2/swagger.json`, classifies discovered paths, and helps us distinguish between replay-capable endpoints and environments that expose only `liveclientdata` endpoints.
+
+v0.25 adds opt-in `/Help` documentation discovery:
+
+```bash
+npx tsx local-processor/src/index.ts --probe-replay-api --probe-replay-help
+```
+
+This calls only `/Help` with an empty POST body because Swagger exposes it as a built-in documentation endpoint. It does not call `/Exit`, `/Cancel`, `/Subscribe`, `/Unsubscribe`, `/AsyncDelete`, `/replay/render`, or `/replay/playback`, and it does not change playback, render, camera, or replay state.
+
+If requested, it writes:
+
+```text
+local-processor/output/replay-api-help-discovery.json
+```
+
+v0.28 adds read-only local replay config inspection:
+
+```bash
+npx tsx local-processor/src/index.ts --inspect-local-replay-config
+```
+
+This inspects only known safe/common local config file paths and writes:
+
+```text
+local-processor/output/local-replay-config-inspection.json
+```
+
+It reads text config files only. It does not modify Riot or League files, does not launch League, does not open replays, does not change replay state, and does not capture frames.
+
+v0.29 also writes a read-only recommendation report when local replay config inspection is requested:
+
+```text
+local-processor/output/replay-api-config-recommendation.json
+```
+
+The recommendation report summarizes the detected `game.cfg` values and lists manual checks for future replay API enablement experiments. The Local Processor still does not modify League config files.
+
 To test a mismatch intentionally:
 
 ```bash

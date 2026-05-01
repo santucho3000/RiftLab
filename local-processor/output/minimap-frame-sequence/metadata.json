@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "minimap-frame-sequence.v0.1",
+  "createdAt": "2026-05-01T19:05:11.678Z",
+  "mode": "replay_api_assisted_capture",
+  "source": {
+    "replayApiAssisted": true,
+    "manualReplayOpenRequired": true,
+    "playbackWindowPlanPath": "local-processor/output/replay-playback-window-plan.json",
+    "playbackApplyReportPath": "local-processor/output/replay-playback-window-apply-report.json",
+    "fixedCapturePresetPath": "local-processor/output/fixed-capture-preset.json"
+  },
+  "window": {
+    "startTime": 30,
+    "endTime": 35,
+    "duration": 5,
+    "speed": 1,
+    "sampleRateFps": 1,
+    "estimatedFrameCount": 5
+  },
+  "capture": {
+    "requested": true,
+    "completed": true,
+    "frameDirectory": "local-processor/output/minimap-frame-sequence/frames",
+    "framesWritten": 5,
+    "normalized": true,
+    "normalizedWidth": 512,
+    "normalizedHeight": 512,
+    "crop": {
+      "x": 1600,
+      "y": 780,
+      "width": 320,
+      "height": 300
+    }
+  },
+  "frames": [
+    {
+      "index": 1,
+      "path": "local-processor/output/minimap-frame-sequence/frames/frame-000001.png",
+      "targetReplayTime": 30,
+      "capturedAt": "2026-05-01T19:05:01.349Z"
+    },
+    {
+      "index": 2,
+      "path": "local-processor/output/minimap-frame-sequence/frames/frame-000002.png",
+      "targetReplayTime": 31,
+      "capturedAt": "2026-05-01T19:05:03.907Z"
+    },
+    {
+      "index": 3,
+      "path": "local-processor/output/minimap-frame-sequence/frames/frame-000003.png",
+      "targetReplayTime": 32,
+      "capturedAt": "2026-05-01T19:05:06.388Z"
+    },
+    {
+      "index": 4,
+      "path": "local-processor/output/minimap-frame-sequence/frames/frame-000004.png",
+      "targetReplayTime": 33,
+      "capturedAt": "2026-05-01T19:05:08.875Z"
+    },
+    {
+      "index": 5,
+      "path": "local-processor/output/minimap-frame-sequence/frames/frame-000005.png",
+      "targetReplayTime": 34,
+      "capturedAt": "2026-05-01T19:05:11.419Z"
+    }
+  ],
+  "restore": {
+    "requested": true,
+    "status": "restored"
+  },
+  "visualAnalysis": {
+    "performed": false,
+    "championDetectionPerformed": false,
+    "wardDetectionPerformed": false,
+    "objectiveDetectionPerformed": false,
+    "notes": [
+      "This step only captures minimap frame images from a controlled replay playback window.",
+      "No champion, ward, objective, or spatial analysis is performed yet.",
+      "Capture uses the fixed window-pixel minimap crop and assumes the replay window matches the configured 1920x1080 layout."
+    ]
+  },
+  "safety": {
+    "doesNotLaunchLeague": true,
+    "doesNotOpenReplay": true,
+    "doesNotAutomateKeyboardOrMouse": true,
+    "doesNotParseRofl": true,
+    "doesNotReadMemory": true,
+    "doesNotInjectCode": true,
+    "doesNotCreateOverlay": true,
+    "doesNotBypassAnticheat": true
+  }
+}

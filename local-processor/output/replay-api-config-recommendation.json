@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "replay-api-config-recommendation.v0.1",
+  "createdAt": "2026-05-01T18:31:56.328Z",
+  "basedOnInspectionPath": "local-processor/output/local-replay-config-inspection.json",
+  "readOnly": true,
+  "configSummary": {
+    "gameCfgFound": true,
+    "gameCfgPath": "C:\\Riot Games\\League of Legends\\Config\\game.cfg",
+    "width": "1920",
+    "height": "1080",
+    "minimapScale": "1.0000",
+    "enableReplayApiFound": true,
+    "enableReplayApiValue": "1",
+    "globalScaleReplayFound": false,
+    "globalScaleReplayValue": null
+  },
+  "recommendation": {
+    "status": "manual_verification_recommended",
+    "notes": [
+      "EnableReplayApi was not found in the inspected config files.",
+      "This may explain why replay render/playback endpoints were not discovered.",
+      "RiftLab should not modify League config automatically.",
+      "Developer may manually inspect game.cfg and compare against pyLoL-style replay configuration."
+    ],
+    "manualChecks": [
+      "Close League before editing config manually, if choosing to test manually.",
+      "Back up game.cfg before any manual experiment.",
+      "Check whether adding EnableReplayApi=1 under the appropriate config section changes endpoint discovery.",
+      "After manual verification, open replay manually and rerun --probe-replay-api."
+    ]
+  },
+  "nextProbe": {
+    "command": "npx tsx local-processor/src/index.ts --probe-replay-api --probe-replay-help --inspect-local-replay-config",
+    "expectedIfEnabled": "Replay endpoint discovery may change from liveclientdata_only to replay_endpoints_available if replay controls become exposed.",
+    "expectedIfUnchanged": "Discovery may remain liveclientdata_only."
+  },
+  "safety": {
+    "doesNotModifyConfig": true,
+    "doesNotLaunchLeague": true,
+    "doesNotOpenReplay": true,
+    "doesNotChangeReplayState": true,
+    "doesNotCaptureFrames": true
+  }
+}

@@ -1,8 +1,7 @@
 {
-  "schemaVersion": "replay-input-manifest.v0.1",
-  "createdAt": "2026-05-01T19:04:59.459Z",
+  "schemaVersion": "manual-replay-open-checklist.v0.1",
+  "createdAt": "2026-05-01T19:04:59.460Z",
   "mode": "manual_safe",
-  "region": "LAS",
   "selectedReplay": {
     "replayPath": "C:\\Users\\Administrator\\Documents\\League of Legends\\Replays\\LA2-1591777797.rofl",
     "replayFileName": "LA2-1591777797.rofl",
@@ -49,16 +48,43 @@
       "Consistency check requires both API match context and an available filename hint."
     ]
   },
-  "processingPlan": {
-    "currentStage": "replay_selected",
-    "nextStage": "manual_replay_review_or_future_frame_capture",
-    "roflParsingEnabled": false,
-    "clientAutomationEnabled": false,
-    "liveGameAnalysisEnabled": false
+  "manualSteps": [
+    {
+      "id": "open_league_client",
+      "status": "manual_required",
+      "instruction": "Open the League of Legends client manually."
+    },
+    {
+      "id": "open_match_history",
+      "status": "manual_required",
+      "instruction": "Go to match history manually."
+    },
+    {
+      "id": "open_selected_replay",
+      "status": "manual_required",
+      "instruction": "Open the replay that corresponds to the selected .rofl file."
+    },
+    {
+      "id": "enter_replay_timeline",
+      "status": "manual_required",
+      "instruction": "Wait until the replay is fully loaded."
+    },
+    {
+      "id": "set_observer_view",
+      "status": "manual_required",
+      "instruction": "Use the normal replay observer view. Do not use third-party tools."
+    }
+  ],
+  "futureReadiness": {
+    "replayWindowDetectionReady": false,
+    "frameCaptureReady": false,
+    "minimapExtractionReady": false,
+    "realVodEvidenceExportReady": false
   },
   "safety": {
     "doesNotLaunchLeague": true,
     "doesNotAutomateClient": true,
+    "doesNotClickClient": true,
     "doesNotReadMemory": true,
     "doesNotInjectCode": true,
     "doesNotCreateOverlay": true,

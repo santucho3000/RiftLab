@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "replay-playback-window-plan.v0.1",
+  "createdAt": "2026-05-01T19:04:59.458Z",
+  "mode": "replay_api_assisted",
+  "dryRun": true,
+  "currentPlayback": {
+    "length": 550.2601928710938,
+    "time": 1.458609938621521,
+    "paused": true,
+    "speed": 1
+  },
+  "requestedWindow": {
+    "startTime": 30,
+    "duration": 5,
+    "endTime": 35,
+    "requestedSpeed": 1,
+    "sampleRateFps": 1
+  },
+  "computedPlan": {
+    "clamped": false,
+    "effectiveStartTime": 30,
+    "effectiveEndTime": 35,
+    "effectiveDuration": 5,
+    "estimatedRealSeconds": 5,
+    "estimatedFrameCount": 5
+  },
+  "safety": {
+    "doesNotCaptureFrames": true,
+    "doesNotTouchRender": true,
+    "doesNotLaunchLeague": true,
+    "doesNotOpenReplay": true
+  }
+}

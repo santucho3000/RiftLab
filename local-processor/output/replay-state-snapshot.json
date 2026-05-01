@@ -1,0 +1,219 @@
+{
+  "schemaVersion": "replay-state-snapshot.v0.1",
+  "createdAt": "2026-05-01T19:04:59.457Z",
+  "baseUrl": "https://127.0.0.1:2999",
+  "readOnly": true,
+  "requested": true,
+  "endpoints": {
+    "game": {
+      "path": "/replay/game",
+      "method": "GET",
+      "ok": true,
+      "statusCode": 200,
+      "data": {
+        "processID": 17712
+      },
+      "error": null
+    },
+    "render": {
+      "path": "/replay/render",
+      "method": "GET",
+      "ok": true,
+      "statusCode": 200,
+      "data": {
+        "banners": false,
+        "cameraAttached": false,
+        "cameraLockX": false,
+        "cameraLockY": false,
+        "cameraLockZ": false,
+        "cameraLookSpeed": 1,
+        "cameraMode": "top",
+        "cameraMoveSpeed": 500,
+        "cameraPosition": {
+          "x": 3170.6787109375,
+          "y": 1911.8480224609375,
+          "z": 11671.4453125
+        },
+        "cameraRotation": {
+          "x": 0,
+          "y": 56,
+          "z": 0
+        },
+        "champions": true,
+        "characters": true,
+        "depthFogColor": {
+          "a": 1,
+          "b": 0,
+          "g": 0,
+          "r": 0
+        },
+        "depthFogEnabled": false,
+        "depthFogEnd": 8000,
+        "depthFogIntensity": 1,
+        "depthFogStart": 5000,
+        "depthOfFieldCircle": 10,
+        "depthOfFieldDebug": false,
+        "depthOfFieldEnabled": false,
+        "depthOfFieldFar": 5000,
+        "depthOfFieldMid": 2000,
+        "depthOfFieldNear": 0,
+        "depthOfFieldWidth": 800,
+        "environment": true,
+        "farClip": 24250,
+        "fieldOfView": 40,
+        "floatingText": true,
+        "fogOfWar": true,
+        "healthBarChampions": true,
+        "healthBarMinions": true,
+        "healthBarPets": true,
+        "healthBarStructures": true,
+        "healthBarWards": true,
+        "heightFogColor": {
+          "a": 1,
+          "b": 0,
+          "g": 0,
+          "r": 0
+        },
+        "heightFogEnabled": false,
+        "heightFogEnd": -100,
+        "heightFogIntensity": 1,
+        "heightFogStart": 300,
+        "interfaceAll": true,
+        "interfaceAnnounce": true,
+        "interfaceChat": false,
+        "interfaceFrames": true,
+        "interfaceKillCallouts": true,
+        "interfaceMinimap": true,
+        "interfaceNeutralTimers": false,
+        "interfaceQuests": null,
+        "interfaceReplay": true,
+        "interfaceScore": true,
+        "interfaceScoreboard": false,
+        "interfaceTarget": true,
+        "interfaceTimeline": true,
+        "minions": true,
+        "navGridOffset": 0,
+        "nearClip": 50,
+        "outlineHover": true,
+        "outlineSelect": true,
+        "particles": true,
+        "selectionName": "",
+        "selectionOffset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "simulateAllParticlesWhileOffScreen": false,
+        "skyboxOffset": 0,
+        "skyboxPath": "",
+        "skyboxRadius": 2500,
+        "skyboxRotation": 0,
+        "sunDirection": {
+          "x": 0.31559720635414124,
+          "y": -0.9467916488647461,
+          "z": 0.06311944127082825
+        }
+      },
+      "error": null
+    },
+    "playback": {
+      "path": "/replay/playback",
+      "method": "GET",
+      "ok": true,
+      "statusCode": 200,
+      "data": {
+        "length": 550.2601928710938,
+        "paused": true,
+        "seeking": false,
+        "speed": 1,
+        "time": 1.458609938621521
+      },
+      "error": null
+    },
+    "sequence": {
+      "path": "/replay/sequence",
+      "method": "GET",
+      "ok": true,
+      "statusCode": 200,
+      "data": {
+        "cameraPosition": null,
+        "cameraRotation": null,
+        "depthFogColor": null,
+        "depthFogEnabled": null,
+        "depthFogEnd": null,
+        "depthFogIntensity": null,
+        "depthFogStart": null,
+        "depthOfFieldCircle": null,
+        "depthOfFieldEnabled": null,
+        "depthOfFieldFar": null,
+        "depthOfFieldMid": null,
+        "depthOfFieldNear": null,
+        "depthOfFieldWidth": null,
+        "farClip": null,
+        "fieldOfView": null,
+        "heightFogColor": null,
+        "heightFogEnabled": null,
+        "heightFogEnd": null,
+        "heightFogIntensity": null,
+        "heightFogStart": null,
+        "navGridOffset": null,
+        "nearClip": null,
+        "playbackSpeed": null,
+        "selectionName": null,
+        "selectionOffset": null,
+        "skyboxOffset": null,
+        "skyboxRadius": null,
+        "skyboxRotation": null,
+        "sunDirection": null
+      },
+      "error": null
+    },
+    "recording": {
+      "path": "/replay/recording",
+      "method": "GET",
+      "ok": true,
+      "statusCode": 200,
+      "data": {
+        "codec": "webm",
+        "currentTime": 1.458609938621521,
+        "endTime": -1,
+        "enforceFrameRate": false,
+        "framesPerSecond": 60,
+        "height": 720,
+        "lossless": false,
+        "path": "",
+        "recording": false,
+        "replaySpeed": 1,
+        "startTime": -1,
+        "width": 1280
+      },
+      "error": null
+    }
+  },
+  "summary": {
+    "allRequestedReadsCompleted": true,
+    "gameReadable": true,
+    "renderReadable": true,
+    "playbackReadable": true,
+    "sequenceReadable": true,
+    "recordingReadable": true
+  },
+  "interpretation": {
+    "status": "snapshot_complete",
+    "notes": [
+      "This is a read-only snapshot.",
+      "No replay state was changed."
+    ]
+  },
+  "safety": {
+    "getOnly": true,
+    "doesNotPost": true,
+    "doesNotChangeRender": true,
+    "doesNotChangePlayback": true,
+    "doesNotSeek": true,
+    "doesNotStartRecording": true,
+    "doesNotCaptureFrames": true,
+    "doesNotLaunchLeague": true,
+    "doesNotOpenReplay": true
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "calibration-report.v0.1",
+  "createdAt": "2026-04-30T21:39:16.299Z",
+  "mode": "manual_safe",
+  "selectedReplay": {
+    "replayPath": "C:\\Users\\Administrator\\Documents\\League of Legends\\Replays\\LA2-1557836680.rofl",
+    "replayFileName": "LA2-1557836680.rofl",
+    "replaySizeBytes": 21408972,
+    "replayModifiedAt": "2026-04-30T19:41:17.086Z",
+    "selectionMode": "explicit"
+  },
+  "matchIdentity": {
+    "matchId": null,
+    "gameId": null,
+    "resolutionStatus": "unresolved",
+    "source": {
+      "type": "none",
+      "authority": null,
+      "providedBy": null,
+      "verifiedByLocalProcessor": false
+    },
+    "notes": [
+      "The Local Processor does not parse .rofl metadata yet.",
+      "Match identity is not guessed.",
+      "Future versions may link replay metadata to Riot API match data."
+    ]
+  },
+  "inputScreenshot": {
+    "path": "C:\\Users\\Administrator\\Downloads\\manual-replay-screenshot.png",
+    "fileName": "manual-replay-screenshot.png",
+    "extension": "png",
+    "exists": true,
+    "providedManuallyByUser": true,
+    "capturedByLocalProcessor": false
+  },
+  "imageMetadata": {
+    "width": 1920,
+    "height": 1080,
+    "readable": true
+  },
+  "presetValidation": {
+    "expectedResolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "resolutionMatchesExpected": true,
+    "minimapCropWithinBounds": true,
+    "status": "pass",
+    "notes": [
+      "Image dimensions match expected preset and minimap crop is within bounds.",
+      "No visual minimap, champion, OCR, or template analysis was performed."
+    ]
+  },
+  "visualAnalysis": {
+    "performed": false,
+    "minimapPresenceDetected": false,
+    "championDetectionPerformed": false,
+    "templateLocatorPerformed": false
+  },
+  "safety": {
+    "doesNotLaunchLeague": true,
+    "doesNotAutomateClient": true,
+    "doesNotClickClient": true,
+    "doesNotReadMemory": true,
+    "doesNotInjectCode": true,
+    "doesNotCreateOverlay": true,
+    "doesNotBypassAnticheat": true,
+    "doesNotCaptureScreenshots": true,
+    "usesManualUserProvidedScreenshotOnly": true
+  }
+}

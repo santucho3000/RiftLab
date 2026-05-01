@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "minimap-crop-export.v0.1",
+  "createdAt": "2026-04-30T21:39:16.397Z",
+  "mode": "manual_safe",
+  "selectedReplay": {
+    "replayPath": "C:\\Users\\Administrator\\Documents\\League of Legends\\Replays\\LA2-1557836680.rofl",
+    "replayFileName": "LA2-1557836680.rofl",
+    "replaySizeBytes": 21408972,
+    "replayModifiedAt": "2026-04-30T19:41:17.086Z",
+    "selectionMode": "explicit"
+  },
+  "matchIdentity": {
+    "matchId": null,
+    "gameId": null,
+    "resolutionStatus": "unresolved",
+    "source": {
+      "type": "none",
+      "authority": null,
+      "providedBy": null,
+      "verifiedByLocalProcessor": false
+    },
+    "notes": [
+      "The Local Processor does not parse .rofl metadata yet.",
+      "Match identity is not guessed.",
+      "Future versions may link replay metadata to Riot API match data."
+    ]
+  },
+  "inputScreenshot": {
+    "path": "C:\\Users\\Administrator\\Downloads\\manual-replay-screenshot.png",
+    "providedManuallyByUser": true,
+    "capturedByLocalProcessor": false
+  },
+  "calibration": {
+    "calibrationReportPath": "local-processor/output/calibration-report.json",
+    "calibrationStatus": "pass"
+  },
+  "crop": {
+    "source": "fixed-capture-preset",
+    "coordinateSystem": "window_pixels",
+    "x": 1600,
+    "y": 780,
+    "width": 320,
+    "height": 300
+  },
+  "outputs": {
+    "rawCropPath": "local-processor/output/minimap-crop.png",
+    "normalizedCropPath": "local-processor/output/minimap-normalized.png",
+    "normalizedWidth": 512,
+    "normalizedHeight": 512
+  },
+  "visualAnalysis": {
+    "performed": false,
+    "championDetectionPerformed": false,
+    "wardDetectionPerformed": false,
+    "objectiveDetectionPerformed": false,
+    "templateLocatorPerformed": false,
+    "notes": [
+      "This step only crops and normalizes the manually provided screenshot.",
+      "No champion, ward, objective, or spatial analysis is performed yet."
+    ]
+  },
+  "safety": {
+    "doesNotLaunchLeague": true,
+    "doesNotAutomateClient": true,
+    "doesNotClickClient": true,
+    "doesNotReadMemory": true,
+    "doesNotInjectCode": true,
+    "doesNotCreateOverlay": true,
+    "doesNotBypassAnticheat": true,
+    "doesNotCaptureScreenshots": true,
+    "usesManualUserProvidedScreenshotOnly": true
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "replay-api-help-discovery.v0.1",
+  "createdAt": "2026-05-01T18:31:56.322Z",
+  "baseUrl": "https://127.0.0.1:2999",
+  "helpProbeRequested": true,
+  "helpEndpointCalled": true,
+  "method": "POST",
+  "path": "/Help",
+  "ok": true,
+  "statusCode": 200,
+  "responseReadable": true,
+  "keywordMatches": {
+    "replay": 2,
+    "render": 3,
+    "playback": 3,
+    "camera": 0,
+    "seek": 1,
+    "time": 3,
+    "pause": 2,
+    "speed": 0,
+    "observer": 0,
+    "minimap": 0,
+    "interface": 0
+  },
+  "candidateFunctionNames": [
+    "replay",
+    "playback",
+    "pause",
+    "render",
+    "rendering",
+    "seek",
+    "Playback",
+    "Render"
+  ],
+  "interpretation": {
+    "status": "possible_replay_functions_found",
+    "notes": [
+      "The /Help response contains possible replay-related keywords or function names.",
+      "Review this report manually before implementing any future control step.",
+      "This probe did not call render, playback, seek, or state-changing endpoints."
+    ]
+  },
+  "safety": {
+    "documentationOnly": true,
+    "doesNotCallExit": true,
+    "doesNotCallCancel": true,
+    "doesNotSubscribe": true,
+    "doesNotUnsubscribe": true,
+    "doesNotChangeRender": true,
+    "doesNotChangePlayback": true,
+    "doesNotSeek": true,
+    "doesNotCaptureFrames": true,
+    "doesNotLaunchLeague": true,
+    "doesNotOpenReplay": true,
+    "doesNotAutomateKeyboardOrMouse": true,
+    "doesNotUseLcuAuthToken": true,
+    "doesNotParseRofl": true
+  }
+}

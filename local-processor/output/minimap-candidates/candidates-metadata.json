@@ -1,0 +1,112 @@
+{
+  "schemaVersion": "minimap-crop-candidates.v0.1",
+  "createdAt": "2026-04-30T21:39:16.554Z",
+  "mode": "manual_safe",
+  "inputScreenshot": {
+    "path": "C:\\Users\\Administrator\\Downloads\\manual-replay-screenshot.png",
+    "providedManuallyByUser": true,
+    "capturedByLocalProcessor": false,
+    "width": 1920,
+    "height": 1080
+  },
+  "candidateCount": 5,
+  "selection": {
+    "automaticSelectionEnabled": false,
+    "selectedCandidateId": null,
+    "notes": [
+      "Candidates are generated for developer inspection.",
+      "No automatic minimap detection is performed yet.",
+      "Future versions should score candidates automatically."
+    ]
+  },
+  "candidates": [
+    {
+      "id": "candidate-01",
+      "x": 1600,
+      "y": 760,
+      "width": 320,
+      "height": 320,
+      "source": "fixed_capture_preset",
+      "notes": [
+        "Square version of the current fixed minimap crop preset.",
+        "Candidate was clamped to fit within screenshot bounds."
+      ],
+      "path": "local-processor/output/minimap-candidates/candidate-01.png",
+      "normalizedWidth": 512,
+      "normalizedHeight": 512
+    },
+    {
+      "id": "candidate-02",
+      "x": 1585,
+      "y": 745,
+      "width": 335,
+      "height": 335,
+      "source": "relative_bottom_right_candidate",
+      "notes": [
+        "Larger bottom-right candidate for HUD scale variance."
+      ],
+      "path": "local-processor/output/minimap-candidates/candidate-02.png",
+      "normalizedWidth": 512,
+      "normalizedHeight": 512
+    },
+    {
+      "id": "candidate-03",
+      "x": 1583,
+      "y": 745,
+      "width": 308,
+      "height": 308,
+      "source": "relative_bottom_right_candidate",
+      "notes": [
+        "Shifted left/up candidate for minimaps displaced by HUD or capture settings."
+      ],
+      "path": "local-processor/output/minimap-candidates/candidate-03.png",
+      "normalizedWidth": 512,
+      "normalizedHeight": 512
+    },
+    {
+      "id": "candidate-04",
+      "x": 1645,
+      "y": 805,
+      "width": 275,
+      "height": 275,
+      "source": "relative_bottom_right_candidate",
+      "notes": [
+        "Smaller candidate for reduced HUD scale settings."
+      ],
+      "path": "local-processor/output/minimap-candidates/candidate-04.png",
+      "normalizedWidth": 512,
+      "normalizedHeight": 512
+    },
+    {
+      "id": "candidate-05",
+      "x": 1553,
+      "y": 713,
+      "width": 367,
+      "height": 367,
+      "source": "relative_bottom_right_candidate",
+      "notes": [
+        "Full probable bottom-right minimap bounding area."
+      ],
+      "path": "local-processor/output/minimap-candidates/candidate-05.png",
+      "normalizedWidth": 512,
+      "normalizedHeight": 512
+    }
+  ],
+  "visualAnalysis": {
+    "performed": false,
+    "championDetectionPerformed": false,
+    "wardDetectionPerformed": false,
+    "templateLocatorPerformed": false
+  },
+  "safety": {
+    "doesNotLaunchLeague": true,
+    "doesNotAutomateClient": true,
+    "doesNotClickClient": true,
+    "doesNotReadMemory": true,
+    "doesNotInjectCode": true,
+    "doesNotCreateOverlay": true,
+    "doesNotBypassAnticheat": true,
+    "doesNotCaptureScreenshots": true,
+    "usesManualUserProvidedScreenshotOnly": true
+  }
+}

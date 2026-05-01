@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "replay-api-status.v0.1",
+  "createdAt": "2026-05-01T19:04:59.436Z",
+  "mode": "replay_api_assisted_probe",
+  "probeRequested": true,
+  "available": true,
+  "baseUrl": "https://127.0.0.1:2999",
+  "checkedEndpoints": [
+    {
+      "path": "/swagger/v2/swagger.json",
+      "method": "GET",
+      "ok": true,
+      "statusCode": 200,
+      "error": null
+    }
+  ],
+  "replayApiAssisted": {
+    "enabledNow": false,
+    "availabilityOnly": true,
+    "renderControlEnabled": false,
+    "playbackControlEnabled": false,
+    "frameCaptureEnabled": false
+  },
+  "safety": {
+    "doesNotLaunchLeague": true,
+    "doesNotOpenReplay": true,
+    "doesNotAutomateKeyboardOrMouse": true,
+    "doesNotUseLcuAuthToken": true,
+    "doesNotParseRofl": true,
+    "doesNotReadMemory": true,
+    "doesNotInjectCode": true,
+    "doesNotCreateOverlay": true,
+    "doesNotBypassAnticheat": true,
+    "doesNotCaptureFrames": true
+  }
+}

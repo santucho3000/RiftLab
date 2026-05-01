@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "replay-api-endpoints.v0.1",
+  "createdAt": "2026-05-01T19:04:59.442Z",
+  "baseUrl": "https://127.0.0.1:2999",
+  "swaggerAvailable": true,
+  "swaggerPath": "/swagger/v2/swagger.json",
+  "endpointDiscovery": {
+    "pathCount": 33,
+    "hasReplayEndpoints": true,
+    "hasReplayRenderEndpoint": true,
+    "hasReplayPlaybackEndpoint": true,
+    "hasLiveClientDataEndpoints": true,
+    "replayPaths": [
+      "/replay/banners",
+      "/replay/game",
+      "/replay/particles",
+      "/replay/playback",
+      "/replay/recording",
+      "/replay/render",
+      "/replay/sequence"
+    ],
+    "liveClientDataPaths": [
+      "/liveclientdata/activeplayer",
+      "/liveclientdata/activeplayerabilities",
+      "/liveclientdata/activeplayername",
+      "/liveclientdata/activeplayerrunes",
+      "/liveclientdata/allgamedata",
+      "/liveclientdata/eventdata",
+      "/liveclientdata/gamestats",
+      "/liveclientdata/playeritems",
+      "/liveclientdata/playerlist",
+      "/liveclientdata/playermainrunes",
+      "/liveclientdata/playerscores",
+      "/liveclientdata/playersummonerspells"
+    ],
+    "swaggerPaths": [
+      "/swagger/v1/api-docs",
+      "/swagger/v1/api-docs/{api}",
+      "/swagger/v2/swagger.json",
+      "/swagger/v3/openapi.json"
+    ],
+    "otherPaths": [
+      "/AsyncDelete",
+      "/AsyncResult",
+      "/AsyncStatus",
+      "/Cancel",
+      "/Exit",
+      "/Help",
+      "/Subscribe",
+      "/Unsubscribe",
+      "/async/v1/result/{asyncToken}",
+      "/async/v1/status/{asyncToken}"
+    ]
+  },
+  "interpretation": {
+    "status": "replay_endpoints_available",
+    "notes": [
+      "Replay-scoped endpoints were discovered in Swagger and may support future assisted standardization."
+    ]
+  },
+  "safety": {
+    "getOnly": true,
+    "doesNotPost": true,
+    "doesNotChangeRender": true,
+    "doesNotChangePlayback": true,
+    "doesNotSeek": true,
+    "doesNotCaptureFrames": true,
+    "doesNotLaunchLeague": true,
+    "doesNotOpenReplay": true,
+    "doesNotAutomateKeyboardOrMouse": true,
+    "doesNotUseLcuAuthToken": true,
+    "doesNotParseRofl": true
+  }
+}

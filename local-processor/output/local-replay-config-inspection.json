@@ -1,0 +1,288 @@
+{
+  "schemaVersion": "local-replay-config-inspection.v0.1",
+  "createdAt": "2026-05-01T18:31:56.328Z",
+  "inspectionRequested": true,
+  "readOnly": true,
+  "configCandidates": [
+    {
+      "path": "C:\\Users\\Administrator\\Documents\\Codex\\2026-04-27\\files-mentioned-by-the-user-idea\\local-processor\\config\\local-processor.example.json",
+      "exists": true,
+      "readable": true,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": "1920",
+        "Height": "1080",
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Known replay/HUD/minimap keys were detected.",
+        "Related terms found for manual review: replay, minimap."
+      ]
+    },
+    {
+      "path": "C:\\Riot Games\\League of Legends\\Config\\game.cfg",
+      "exists": true,
+      "readable": true,
+      "detectedKeys": {
+        "EnableReplayApi": "1",
+        "Width": "1920",
+        "Height": "1080",
+        "MinimapScale": "1.0000",
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Known replay/HUD/minimap keys were detected.",
+        "Related terms found for manual review: hud, window, replay, minimap."
+      ]
+    },
+    {
+      "path": "C:\\Riot Games\\League of Legends\\Config\\PersistedSettings.json",
+      "exists": true,
+      "readable": true,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Related terms found for manual review: hud, replay, minimap."
+      ]
+    },
+    {
+      "path": "C:\\Riot Games\\League of Legends\\Config\\LeagueClientSettings.yaml",
+      "exists": true,
+      "readable": true,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Related terms found for manual review: replay."
+      ]
+    },
+    {
+      "path": "C:\\Riot Games\\League of Legends\\Config\\LeagueClientSettings.yml",
+      "exists": false,
+      "readable": false,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Candidate file was not found."
+      ]
+    },
+    {
+      "path": "C:\\Program Files\\Riot Games\\League of Legends\\Config\\game.cfg",
+      "exists": false,
+      "readable": false,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Candidate file was not found."
+      ]
+    },
+    {
+      "path": "C:\\Program Files\\Riot Games\\League of Legends\\Config\\PersistedSettings.json",
+      "exists": false,
+      "readable": false,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Candidate file was not found."
+      ]
+    },
+    {
+      "path": "C:\\Program Files\\Riot Games\\League of Legends\\Config\\LeagueClientSettings.yaml",
+      "exists": false,
+      "readable": false,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Candidate file was not found."
+      ]
+    },
+    {
+      "path": "C:\\Program Files\\Riot Games\\League of Legends\\Config\\LeagueClientSettings.yml",
+      "exists": false,
+      "readable": false,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Candidate file was not found."
+      ]
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Riot Games\\League of Legends\\Config\\game.cfg",
+      "exists": false,
+      "readable": false,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Candidate file was not found."
+      ]
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Riot Games\\League of Legends\\Config\\PersistedSettings.json",
+      "exists": false,
+      "readable": false,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Candidate file was not found."
+      ]
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Riot Games\\League of Legends\\Config\\LeagueClientSettings.yaml",
+      "exists": false,
+      "readable": false,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Candidate file was not found."
+      ]
+    },
+    {
+      "path": "C:\\Program Files (x86)\\Riot Games\\League of Legends\\Config\\LeagueClientSettings.yml",
+      "exists": false,
+      "readable": false,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Candidate file was not found."
+      ]
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Riot Games\\League of Legends\\Config\\game.cfg",
+      "exists": false,
+      "readable": false,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Candidate file was not found."
+      ]
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Riot Games\\League of Legends\\Config\\PersistedSettings.json",
+      "exists": false,
+      "readable": false,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Candidate file was not found."
+      ]
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Riot Games\\League of Legends\\Config\\LeagueClientSettings.yaml",
+      "exists": false,
+      "readable": false,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Candidate file was not found."
+      ]
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Riot Games\\League of Legends\\Config\\LeagueClientSettings.yml",
+      "exists": false,
+      "readable": false,
+      "detectedKeys": {
+        "EnableReplayApi": null,
+        "Width": null,
+        "Height": null,
+        "MinimapScale": null,
+        "GlobalScaleReplay": null
+      },
+      "notes": [
+        "Candidate file was not found."
+      ]
+    }
+  ],
+  "summary": {
+    "anyConfigFound": true,
+    "enableReplayApiFound": true,
+    "enableReplayApiValue": "1",
+    "resolutionFound": true,
+    "minimapScaleFound": true,
+    "globalScaleReplayFound": false
+  },
+  "interpretation": {
+    "status": "config_found",
+    "notes": [
+      "EnableReplayApi was found in a readable config candidate.",
+      "This is a local config observation only; endpoint discovery is still required to confirm available replay controls."
+    ]
+  },
+  "safety": {
+    "readOnly": true,
+    "doesNotModifyConfig": true,
+    "doesNotLaunchLeague": true,
+    "doesNotOpenReplay": true,
+    "doesNotChangeReplayState": true,
+    "doesNotCaptureFrames": true
+  }
+}

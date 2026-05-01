@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "replay-render-preset-plan.v0.1",
+  "createdAt": "2026-05-01T18:44:28.853Z",
+  "mode": "replay_api_assisted_dry_run",
+  "readOnly": true,
+  "presetName": "riftlab_minimap_capture_v0.1",
+  "sourceSnapshotPath": "local-processor/output/replay-state-snapshot.json",
+  "currentRenderSubset": {
+    "interfaceMinimap": true,
+    "interfaceReplay": true,
+    "interfaceScoreboard": false,
+    "interfaceChat": false,
+    "interfaceTimeline": true,
+    "interfaceScore": true,
+    "fogOfWar": true,
+    "cameraMode": "top"
+  },
+  "proposedPreset": {
+    "interfaceMinimap": true,
+    "interfaceReplay": true,
+    "interfaceScoreboard": false,
+    "interfaceChat": false,
+    "interfaceTimeline": true,
+    "interfaceScore": true,
+    "fogOfWar": true,
+    "cameraMode": "top"
+  },
+  "diff": [
+    {
+      "key": "interfaceMinimap",
+      "current": true,
+      "proposed": true,
+      "changeNeeded": false
+    },
+    {
+      "key": "interfaceReplay",
+      "current": true,
+      "proposed": true,
+      "changeNeeded": false
+    },
+    {
+      "key": "interfaceScoreboard",
+      "current": false,
+      "proposed": false,
+      "changeNeeded": false
+    },
+    {
+      "key": "interfaceChat",
+      "current": false,
+      "proposed": false,
+      "changeNeeded": false
+    },
+    {
+      "key": "interfaceTimeline",
+      "current": true,
+      "proposed": true,
+      "changeNeeded": false
+    },
+    {
+      "key": "interfaceScore",
+      "current": true,
+      "proposed": true,
+      "changeNeeded": false
+    },
+    {
+      "key": "fogOfWar",
+      "current": true,
+      "proposed": true,
+      "changeNeeded": false
+    },
+    {
+      "key": "cameraMode",
+      "current": "top",
+      "proposed": "top",
+      "changeNeeded": false
+    }
+  ],
+  "summary": {
+    "totalKeysChecked": 8,
+    "changesNeeded": 0,
+    "alreadyMatches": 8,
+    "readyForApplyStep": true
+  },
+  "interpretation": {
+    "status": "plan_created",
+    "notes": [
+      "This is a dry-run render preset plan.",
+      "No render state was changed.",
+      "Future versions may apply this preset with explicit opt-in."
+    ]
+  },
+  "safety": {
+    "dryRunOnly": true,
+    "doesNotPost": true,
+    "doesNotChangeRender": true,
+    "doesNotChangePlayback": true,
+    "doesNotSeek": true,
+    "doesNotCaptureFrames": true,
+    "doesNotLaunchLeague": true,
+    "doesNotOpenReplay": true
+  }
+}
